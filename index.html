@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="description" content="Leadership Coach: simulador de conversas de liderança. Conversas que desenvolvem líderes.">
+<title>Leadership Coach | Conversas que desenvolvem líderes</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2317273B'/%3E%3Cpath d='M8 21v-9a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3h-6l-4 3z' fill='%236FA99B'/%3E%3C/svg%3E">
+<style>
+/* ===== 1. TOKENS ===== */
+:root{
+  --navy:#17273B; --petrol:#236B83; --sage:#6FA99B; --bg:#F6F8FA; --card:#fff;
+  --muted:#64748B; --amber:#D9A441; --red:#D86B6B;
+  --sage-d:#2E6E60; --amber-d:#7A5410; --red-d:#9A3A3A;
+  --sage-t:#E7F2EF; --amber-t:#FBF2DF; --red-t:#FBEAEA; --petrol-t:#E4F0F4;
+  --line:#DCE3EB; --line-2:#C3CDD9; --text:#17273B;
+  --r:14px; --r-s:10px; --shadow:0 1px 2px rgba(23,39,59,.05),0 6px 18px rgba(23,39,59,.05);
+  --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--sans)}
+h1,h2,h3,h4{margin:0;line-height:1.2;font-family:var(--serif);font-weight:700;letter-spacing:-.005em}
+h1{font-size:clamp(1.8rem,1.3rem + 2vw,2.5rem)} h2{font-size:1.35rem} h3{font-size:1.08rem} h4{font-size:.95rem;font-family:var(--sans)}
+p{margin:0} button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--petrol);outline-offset:2px;border-radius:6px}
+[tabindex="-1"]:focus{outline:none}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0}
+.skip{position:absolute;left:12px;top:-60px;background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;z-index:100}
+.skip:focus{top:12px}
+.icon{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.muted{color:var(--muted)}
+/* ===== 2. LAYOUT ===== */
+.topbar{background:var(--navy);color:#fff}
+.topbar-in{max-width:1180px;margin:0 auto;padding:14px clamp(16px,3vw,32px);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:12px;background:none;border:0;color:#fff;cursor:pointer;padding:0;text-align:left}
+.brand-mark{width:38px;height:38px;border-radius:11px;background:var(--sage);color:var(--navy);display:grid;place-items:center}
+.brand b{display:block;font-family:var(--serif);font-size:1.18rem;line-height:1.1}
+.brand small{display:block;color:#B7C4D4;font-size:.78rem}
+.nav{display:flex;gap:6px;flex-wrap:wrap}
+.nav button{display:flex;align-items:center;gap:8px;background:none;border:0;color:#D5DEE9;padding:9px 14px;border-radius:10px;cursor:pointer;transition:background .15s}
+.nav button:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav button[aria-current="page"]{background:rgba(255,255,255,.16);color:#fff;font-weight:600}
+main{max-width:1180px;margin:0 auto;padding:32px clamp(16px,3vw,32px) 64px}
+.screen{animation:enter .28s ease both}
+@keyframes enter{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-head{display:grid;gap:8px;max-width:72ch;margin-bottom:26px}
+.page-head p{color:var(--muted);font-size:1.05rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:24px}
+.stack{display:grid;gap:22px}
+.grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:20px}
+.grid-2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:22px;align-items:start}
+.cols-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.row.between{justify-content:space-between}
+.section-title{margin:34px 0 14px}
+/* ===== 3. COMPONENTES ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:46px;padding:10px 20px;border-radius:var(--r-s);border:1px solid var(--line-2);background:#fff;color:var(--navy);font-weight:600;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
+.btn:hover:not(:disabled){background:#EEF3F7;border-color:#9FB0C2}
+.btn:active:not(:disabled){transform:translateY(1px)}
+.btn.primary{background:var(--petrol);border-color:var(--petrol);color:#fff}
+.btn.primary:hover:not(:disabled){background:var(--navy);border-color:var(--navy)}
+.btn.danger{color:var(--red-d);border-color:#E3B2B2}
+.btn.danger:hover:not(:disabled){background:var(--red-t)}
+.btn.danger.solid{background:#A93F3F;border-color:#A93F3F;color:#fff}
+.btn.small{min-height:38px;padding:6px 14px;font-size:.92rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;font-size:.85rem;font-weight:600;background:var(--petrol-t);color:var(--petrol);border:1px solid #BCD9E2}
+.chip.ok{background:var(--sage-t);color:var(--sage-d);border-color:#BBD9D1}
+.chip.warn{background:var(--amber-t);color:var(--amber-d);border-color:#EBD3A0}
+.chip.risk{background:var(--red-t);color:var(--red-d);border-color:#E8BDBD}
+.chip.plain{background:#EEF2F6;color:var(--muted);border-color:var(--line)}
+.chip .icon{width:15px;height:15px}
+.diff{display:inline-flex;gap:3px;align-items:center}
+.diff i{width:14px;height:6px;border-radius:3px;background:#D5DDE6}.diff i.on{background:var(--petrol)}
+.avatar{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:.95rem;flex:none;color:var(--navy);background:#DCE7EF}
+.avatar.a1{background:#D6E9E4}.avatar.a2{background:#E3E1F0}.avatar.me{background:var(--navy);color:#fff}
+.avatar.sm{width:34px;height:34px;font-size:.78rem}.avatar.lg{width:60px;height:60px;font-size:1.15rem}
+.meter{display:flex;gap:4px}.meter i{display:block;width:20px;height:7px;border-radius:4px;background:#E0E6ED}.meter i.on{background:var(--petrol)}
+.progress{height:8px;border-radius:99px;background:#E3E9F0;overflow:hidden}.progress>span{display:block;height:100%;background:var(--petrol);transition:width .4s}
+.bar{height:12px;border-radius:99px;background:#E3E9F0;overflow:hidden}.bar>span{display:block;height:100%;border-radius:99px;background:var(--petrol)}
+.bar.ok>span{background:var(--sage)}.bar.warn>span{background:var(--amber)}.bar.risk>span{background:var(--red)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 20px;margin:12px 0 0;padding:0;list-style:none;color:var(--muted);font-size:.93rem}
+.facts li{display:flex;gap:7px;align-items:center}
+.list{margin:10px 0 0;padding-left:1.15em;display:grid;gap:8px}
+.notice{border-radius:var(--r-s);padding:13px 16px;background:var(--amber-t);border:1px solid #EBD3A0;color:#5A3D07;display:flex;gap:10px;align-items:flex-start;font-size:.95rem}
+.notice.info{background:var(--petrol-t);border-color:#BCD9E2;color:#17475A}
+.empty{border:1.5px dashed var(--line-2);border-radius:var(--r);padding:26px;text-align:center;color:var(--muted);display:grid;gap:12px;justify-items:center}
+details.acc{border:1px solid var(--line);border-radius:var(--r-s);padding:0 16px;background:#FBFCFD}
+details.acc summary{cursor:pointer;padding:13px 0;font-weight:600;list-style:none;display:flex;justify-content:space-between;gap:12px}
+details.acc summary::-webkit-details-marker{display:none}
+details.acc summary::after{content:"+";font-size:1.3rem;color:var(--petrol)}
+details.acc[open] summary::after{content:"−"}
+.acc-body{padding:0 0 16px;display:grid;gap:10px;color:var(--muted);font-size:.95rem}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:12px 18px;border-radius:12px;box-shadow:0 10px 30px rgba(23,39,59,.3);z-index:60;max-width:min(92vw,520px)}
+dialog{border:0;border-radius:var(--r);padding:26px;max-width:min(92vw,440px);box-shadow:0 20px 60px rgba(23,39,59,.35);color:var(--text)}
+dialog::backdrop{background:rgba(23,39,59,.5)} dialog h2{margin-bottom:8px} dialog p{color:var(--muted);margin-bottom:22px} dialog .row{justify-content:flex-end}
+.field{display:grid;gap:6px;margin-bottom:16px}.field label{font-weight:600}
+.field textarea,.field input,.field select{width:100%;padding:11px 13px;border:1px solid var(--line-2);border-radius:var(--r-s);background:#fff;min-height:46px}
+.field textarea{min-height:96px;resize:vertical}
+.hero{background:linear-gradient(0deg,var(--sage-t),var(--sage-t));border:1px solid #CFE3DD;border-radius:var(--r);padding:26px clamp(18px,3vw,32px);display:grid;gap:8px}
+.hero h2{font-size:1.5rem}.hero p{max-width:62ch;color:#2F4A57;font-size:1.05rem}
+.sc-card{display:grid;gap:12px;align-content:start}
+.sc-card h3{font-size:1.25rem}
+.stat{display:grid;gap:2px}.stat b{font-family:var(--serif);font-size:1.9rem;line-height:1}.stat span{color:var(--muted);font-size:.9rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:18px}
+.attempt{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:18px 0;border-top:1px solid var(--line)}
+.attempt:first-of-type{border-top:0}
+.score-badge{width:60px;height:60px;border-radius:15px;display:grid;place-items:center;background:var(--petrol-t);color:var(--petrol);font:700 1.45rem var(--serif)}
+.mini-bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.mini-bars small{display:flex;justify-content:space-between;color:var(--muted);font-size:.78rem;margin-bottom:4px;gap:4px}
+.pick{display:flex;align-items:center;gap:8px;font-size:.9rem}
+.pick input{width:20px;height:20px}
+/* ===== 4. SIMULADOR ===== */
+.sim{display:grid;grid-template-columns:320px minmax(0,1fr);gap:20px;align-items:start}
+.sim-side{position:sticky;top:18px;display:grid;gap:16px}
+.sim-main{display:grid;gap:18px;min-width:0}
+.persona{display:flex;gap:12px;align-items:center}
+.persona b{display:block;line-height:1.25}.persona small{color:var(--muted)}
+.state{display:grid;gap:10px}
+.state-row{display:grid;gap:4px;font-size:.9rem}.state-row .top{display:flex;justify-content:space-between;gap:8px}
+.chat-head{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.mood{display:grid;gap:4px;justify-items:end;font-size:.88rem;color:var(--muted)}.mood b{color:var(--navy)}
+.chat-log{height:clamp(250px,40vh,440px);overflow-y:auto;padding:18px 4px 4px;display:flex;flex-direction:column;gap:16px;scroll-behavior:smooth}
+.msg{display:flex;gap:10px;align-items:flex-end;max-width:88%}
+.msg.me{align-self:flex-end;flex-direction:row-reverse}
+.bubble{padding:12px 16px;border-radius:16px;border:1px solid var(--line);background:#F4F7FA}
+.msg.other .bubble{border-bottom-left-radius:5px}
+.msg.me .bubble{background:var(--navy);border-color:var(--navy);color:#fff;border-bottom-right-radius:5px}
+.bubble .who{font-size:.78rem;font-weight:700;margin-bottom:3px;color:var(--petrol)}.msg.me .bubble .who{color:#A9D9CE}
+.msg.new{animation:enter .3s ease both}
+.typing{display:inline-flex;gap:5px;padding:4px 0}.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:blink 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.decision fieldset{border:0;padding:0;margin:0;min-width:0}
+.decision legend{padding:0;font:700 1.15rem var(--serif);margin-bottom:6px;display:block}
+.decision legend small{display:block;color:var(--petrol);font:600 .88rem var(--sans);margin-bottom:2px}
+.prompt{color:var(--muted);margin-bottom:16px;max-width:75ch}
+.options{display:grid;gap:12px}
+.option{position:relative;display:block;cursor:pointer}
+.option input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.option-body{display:grid;grid-template-columns:24px 1fr;gap:14px;padding:16px 18px;border:1.5px solid var(--line);border-radius:var(--r);background:#fff;transition:border-color .15s,background .15s}
+.option:hover .option-body{border-color:#9FB4C9;background:#FAFCFE}
+.option input:focus-visible + .option-body{outline:3px solid var(--petrol);outline-offset:2px}
+.option input:checked + .option-body{border-color:var(--petrol);background:var(--petrol-t);box-shadow:0 0 0 1px var(--petrol)}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid var(--line-2);display:grid;place-items:center;margin-top:2px}
+.dot svg{width:13px;height:13px;stroke:#fff;stroke-width:3;fill:none;opacity:0}
+.option input:checked + .option-body .dot{background:var(--petrol);border-color:var(--petrol)}.option input:checked + .option-body .dot svg{opacity:1}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px;align-items:center}
+.hint{border-left:4px solid var(--sage);background:var(--sage-t);padding:12px 16px;border-radius:0 var(--r-s) var(--r-s) 0;margin-bottom:16px;color:#21453B}
+.fb{display:grid;gap:16px}.fb-head{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center}
+.fb-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fb-block{border:1px solid var(--line);border-radius:var(--r-s);padding:14px 16px;background:#FBFCFD}
+.fb-block h4{color:var(--petrol);margin-bottom:5px}
+.fb-block.wide{grid-column:1/-1;background:var(--petrol-t);border-color:#BCD9E2}
+.deltas{display:flex;flex-wrap:wrap;gap:8px}
+/* ===== 5. RELATÓRIO ===== */
+.hero-rep{display:grid;grid-template-columns:auto 1fr;gap:26px;align-items:center}
+.score-ring{--p:0;--ring:var(--petrol);width:150px;height:150px;border-radius:50%;background:conic-gradient(var(--ring) calc(var(--p)*1%),#E3E9F0 0);display:grid;place-items:center}
+.score-ring div{width:118px;height:118px;background:#fff;border-radius:50%;display:grid;place-items:center;text-align:center}
+.score-ring b{font:700 2.4rem var(--serif);line-height:1}.score-ring small{display:block;color:var(--muted);font-size:.78rem}
+.quote{border-left:4px solid var(--line-2);padding:2px 0 2px 16px;color:var(--muted);font-style:italic;margin-top:10px}
+.comp-split{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:26px;align-items:center}
+.comp-row{display:grid;gap:7px;margin-bottom:18px}.comp-row .top{display:flex;justify-content:space-between;gap:12px;align-items:baseline;flex-wrap:wrap}
+.radar{width:100%;max-width:280px;height:auto;justify-self:center}
+.step{display:grid;gap:10px;padding:20px 0;border-top:1px solid var(--line)}.step:first-of-type{border-top:0}
+.step-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline}
+.quoteblock{background:#F3F6F9;border-radius:var(--r-s);padding:12px 14px;font-size:.95rem}
+.quoteblock b{display:block;font-size:.82rem;color:var(--petrol);margin-bottom:2px}
+.print-only{display:none}
+.report-actions{display:flex;flex-wrap:wrap;gap:12px}
+.cmp{width:100%;border-collapse:collapse;font-size:.95rem}
+.cmp th,.cmp td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp thead th{background:#F1F5F8}
+.cmp-wrap{overflow-x:auto}
+/* ===== 6. RESPONSIVO ===== */
+@media (max-width:900px){
+  .grid-2,.sim,.cols-2,.comp-split{grid-template-columns:1fr}
+  .sim-side{position:static}
+  .mini-bars{grid-template-columns:repeat(2,minmax(0,1fr))}
+  main{padding-top:22px}
+}
+@media (max-width:620px){
+  .fb-grid{grid-template-columns:1fr}
+  .hero-rep{grid-template-columns:1fr;justify-items:start}
+  .attempt{grid-template-columns:auto 1fr}.attempt .row{grid-column:1/-1}
+  .msg{max-width:96%}.card{padding:18px}.mood{justify-items:start}
+  .brand small{display:none}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+/* ===== 7. IMPRESSÃO ===== */
+@media print{
+  body{background:#fff;font-size:11pt}
+  .topbar,.skip,.report-actions,.toast,#announcer,.no-print{display:none!important}
+  main{padding:0;max-width:none}
+  .card{box-shadow:none;break-inside:avoid;border-color:#bbb}
+  .step,.comp-row{break-inside:avoid}
+  .print-only{display:block!important}
+  details.acc>*{display:block!important}
+  .screen{animation:none}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Ir para o conteúdo principal</a>
+<header class="topbar"><div class="topbar-in">
+  <button class="brand" type="button" data-action="go" data-to="dashboard" aria-label="Leadership Coach, ir para o início">
+    <span class="brand-mark" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M4 16V8a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3h-6l-4 3z"/></svg></span>
+    <span><b>Leadership Coach</b><small>Conversas que desenvolvem líderes.</small></span>
+  </button>
+  <nav class="nav" aria-label="Navegação principal">
+    <button type="button" data-action="go" data-to="dashboard" id="nav-dashboard">Início</button>
+    <button type="button" data-action="go" data-to="library" id="nav-library">Biblioteca</button>
+    <button type="button" data-action="go" data-to="history" id="nav-history">Histórico</button>
+  </nav>
+</div></header>
+<main id="main">
+  <noscript><div class="notice">O Leadership Coach precisa de JavaScript. Ative-o no navegador e recarregue a página.</div></noscript>
+  <section class="screen" id="screen-dashboard" hidden></section>
+  <section class="screen" id="screen-library" hidden></section>
+  <section class="screen" id="screen-briefing" hidden></section>
+  <section class="screen" id="screen-sim" hidden></section>
+  <section class="screen" id="screen-report" hidden></section>
+  <section class="screen" id="screen-history" hidden></section>
+  <section class="screen" id="screen-compare" hidden></section>
+</main>
+<div id="announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+<div id="toast" class="toast" role="status" hidden></div>
+<dialog id="dlg" aria-labelledby="dlg-title" aria-describedby="dlg-text">
+  <form method="dialog"><h2 id="dlg-title"></h2><p id="dlg-text"></p>
+    <div class="row"><button class="btn" value="cancel" id="dlg-cancel">Cancelar</button><button class="btn primary" value="ok" id="dlg-ok">Confirmar</button></div></form>
+</dialog>
+<script>
+"use strict";
+/* =====================================================================
+   1. CONFIGURAÇÕES E CONSTANTES
+   ===================================================================== */
+const CFG = { key:"leadership_coach_v1", max:10, start:{trust:4,open:4,agree:0,prog:0}, total:5 };
+const VARS = [
+  {k:"trust",name:"Confiança"}, {k:"open",name:"Abertura ao diálogo"},
+  {k:"agree",name:"Qualidade dos acordos"}, {k:"prog",name:"Evolução da conversa"}
+];
+const MOODS = {1:"Tensão alta",2:"Cautela",3:"Atenção",4:"Abertura",5:"Alinhamento"};
+
+/* =====================================================================
+   2. RUBRICAS DE COMPETÊNCIAS
+   Ordem dos índices em cada alternativa: s:[escuta, empatia, comunicação, direcionamento]
+   Níveis 0 a 3 por alternativa, com comportamento observável.
+   ===================================================================== */
+const COMPS = [
+  {k:"esc",name:"Escuta ativa",icon:"ear",desc:"Demonstrar atenção, formular perguntas relevantes e verificar compreensão.",
+   levels:["Não demonstrou escuta: não explorou a perspectiva do outro.","Escuta limitada: reconheceu a fala, mas não explorou nem verificou.","Escuta consistente: fez perguntas ou resumiu o que ouviu.","Escuta aprofundada: combinou perguntas abertas, paráfrase e verificação."],
+   recs:{low:"Pratique perguntas abertas e a paráfrase: “Se entendi bem, você está dizendo que…”. Verifique antes de responder.",mid:"Você ouviu bem em alguns momentos. Procure verificar a compreensão com mais frequência antes de propor soluções.",high:"Sua escuta foi consistente. Atenção para equilibrar perguntas com encaminhamentos, para a conversa não se alongar sem direção."}},
+  {k:"emp",name:"Empatia",icon:"heart",desc:"Reconhecer sentimentos, perspectivas e necessidades sem abrir mão da responsabilidade profissional.",
+   levels:["Não reconheceu sentimentos ou necessidades.","Reconhecimento breve ou genérico.","Reconheceu sentimentos e perspectivas, mantendo o papel de líder.","Reconheceu com precisão e ligou a necessidade ao próximo passo, sem perder a responsabilidade profissional."],
+   recs:{low:"Nomeie o que a pessoa parece sentir antes de falar de resultados. Exemplo: “Imagino que isso tenha sido frustrante”.",mid:"Seu acolhimento apareceu de forma irregular. Mantenha-o ao longo da conversa, sobretudo quando trouxer expectativas.",high:"Seu acolhimento foi consistente. Garanta que ele venha acompanhado de clareza sobre o que se espera."}},
+  {k:"com",name:"Comunicação assertiva",icon:"chat",desc:"Comunicar expectativas, informações e observações com respeito e objetividade.",
+   levels:["Mensagem confusa, evasiva ou desrespeitosa.","Mensagem parcialmente clara.","Comunicou expectativa ou informação com clareza e respeito.","Comunicou fatos, impacto e expectativa de forma objetiva e respeitosa."],
+   recs:{low:"Estruture mensagens difíceis em fatos observáveis, impacto e expectativa. Evite generalizações e termos vagos.",mid:"Suas mensagens oscilaram entre clareza e suavização. Revise-as buscando precisão sobre fatos, critérios e limites.",high:"Sua comunicação foi objetiva e respeitosa. Dê pausas para que a pessoa reaja antes de avançar."}},
+  {k:"dir",name:"Direcionamento",icon:"route",desc:"Construir encaminhamentos, acordos, responsabilidades e próximos passos.",
+   levels:["Nenhum encaminhamento.","Encaminhamento vago ou sem responsável.","Encaminhamento com próximo passo claro.","Acordo construído com a pessoa, com responsável, prazo e forma de acompanhamento."],
+   recs:{low:"Feche cada conversa com o quê, quem e quando. Registre o combinado e marque o acompanhamento.",mid:"Você propôs encaminhamentos, mas nem sempre com prazos e responsáveis. Pratique a matriz: o quê, quem, quando.",high:"Você conduziu bem os acordos. Confirme se a pessoa consegue cumprir o que foi combinado."}}
+];
+
+const REFLECTION_QS = [
+  "Qual decisão você considera que mais influenciou o resultado?",
+  "O que faria de maneira diferente em uma conversa real?",
+  "Qual comportamento deseja praticar nas próximas semanas?"
+];
+
+/* =====================================================================
+   3. PERFIS DOS PERSONAGENS E CENÁRIOS (dados puros, prontos para JSON)
+   Formato das cenas:
+     v: variantes da fala do colaborador. Escolhe-se a primeira cuja condição w combina.
+        l = [[personagem, texto], ...]; m = nível de abertura (1 a 5)
+     o: alternativas. s = [escuta, empatia, comunicação, direcionamento], 0 a 3
+        fl = marcadores narrativos; next = próxima cena ou "END"
+   Condições: flag, notFlag, flagAny[], chose, choseAny[], trustMin/Max, openMin/Max,
+              agreeMin/Max, progMin/Max, scoreMin/Max
+   ===================================================================== */
+const COMPANY = "Lumina Solutions";
+
+/* Alternativas do momento 2 do Cenário 1, compartilhadas pelas três variações da cena */
+const F2_OPTS = [
+  {id:"f2-a",label:"Resumir e verificar o que ouviu",
+   text:"Deixa eu ver se entendi: depois que a Paula saiu, você assumiu parte das atividades dela sem um combinado claro, e isso tem pesado nos seus prazos. Isso procede? O que mais pesa hoje?",
+   s:[3,2,2,1],fl:["clarified"],next:"f3",
+   beh:"Parafraseou o que ouviu e abriu espaço para correção e complemento.",
+   eff:{f2a:"Marina confirma e amplia o contexto, sentindo que foi compreendida.",f2b:"A paráfrase transforma o “vago” em fatos concretos, e Marina passa a colaborar com informações.",f2c:"Ao resumir sem julgar, você reduz a defensividade e Marina volta ao tema com mais calma."},
+   adj:"Complemente com uma pergunta sobre o que ela precisaria para trabalhar melhor.",
+   tip:"Em conversas reais, resuma em uma ou duas frases e termine com uma pergunta de verificação."},
+  {id:"f2-b",label:"Acolher e já pedir retomada dos prazos",
+   text:"Obrigado por contar. Faz sentido que isso pese. Mas preciso que os relatórios voltem ao prazo já nesta semana. O que você precisa de mim para isso?",
+   s:[1,1,2,3],fl:["rushed"],next:"f3",
+   beh:"Reconheceu o contexto de forma breve e foi rapidamente ao direcionamento.",
+   eff:{f2a:"Marina percebe pressa e responde com mais cautela, mas aceita a pergunta sobre apoio.",f2b:"Marina valoriza a pergunta sobre apoio, mas sente que o contexto foi pouco explorado.",f2c:"A cobrança de prazo logo após o relato reacende a defensividade de Marina."},
+   adj:"Antes de definir prazos, verifique se você compreendeu as causas do atraso.",
+   tip:"Quando houver pressão por resultado, nomeie o contexto em uma frase e pergunte antes de propor."},
+  {id:"f2-c",label:"Validar sentimentos e adiar a pauta",
+   text:"Sinto muito que tenha sido assim. Você tem todo o direito de estar frustrada. Se preferir, hoje podemos só conversar sobre como você está se sentindo.",
+   s:[2,3,0,0],fl:["comforted"],next:"f3",
+   beh:"Validou a emoção com intensidade e adiou a pauta de desempenho.",
+   eff:{f2a:"Marina agradece, mas a conversa perde objetivo e ela fica sem saber o que será tratado.",f2b:"O acolhimento é bem recebido, mas Marina ainda quer saber o que se espera dela.",f2c:"O acolhimento desarma Marina, mas a pauta de desempenho continua sem encaminhamento."},
+   adj:"Acolha e, em seguida, explicite o objetivo da conversa para dar segurança.",
+   tip:"Empatia não elimina a pauta. Diga com clareza o que será tratado e por quê."}
+];
+
+const SCENARIOS = {
+/* ------------------------------------------------------------------ */
+feedback:{
+  id:"feedback",title:"Feedback de desempenho",difficulty:2,minutes:"10 a 15",
+  summary:"Uma colaboradora comprometida apresenta queda de desempenho nas últimas semanas. Você precisa conduzir uma conversa construtiva.",
+  tags:["Escuta ativa","Comunicação assertiva","Empatia","Direcionamento"],
+  start:"f1",
+  chars:{marina:{name:"Marina Lopes",ini:"ML",role:"Analista de Operações",tone:"a1",
+    profile:"Três anos na empresa e bom histórico de entregas. Está há dois meses em uma equipe reorganizada, com novo fluxo de relatórios."}},
+  brief:{
+    context:"Na Lumina Solutions, empresa de soluções digitais para o setor financeiro, a área de Operações foi reorganizada há dois meses. Uma colega experiente, Paula, deixou a equipe e parte das suas atividades foi redistribuída.",
+    situation:"Nas últimas quatro semanas, Marina entregou três relatórios com atraso e dois com necessidade de retrabalho. Antes disso, seu desempenho era consistente.",
+    goal:"Conduzir uma conversa de feedback que esclareça a situação, preserve a relação e termine com acordos claros para voltar ao padrão esperado.",
+    tips:["Escolha a resposta que você daria em uma conversa real.","Você pode pedir uma orientação antes de decidir. Isso é registrado no relatório, sem penalização.","As reações de Marina mudam conforme o que você diz e como conduz a conversa."]},
+  steps:["Abertura da conversa","Escuta e compreensão do contexto","Aprofundar causas e alinhar expectativas","Construir encaminhamentos","Fechamento e acompanhamento"],
+  scenes:{
+    f1:{step:1,prompt:"Marina chegou e abriu a conversa com uma percepção própria. Como você responde?",
+      hint:"Pense no que ela precisa sentir para que a conversa continue produtiva, e no que você precisa deixar claro.",
+      v:[{m:2,l:[["marina","Oi, tudo bem? Vi que você marcou esta conversa. Tenho a impressão de que nada do que faço está sendo reconhecido. Parece que só aparecem os problemas."]]}],
+      o:[
+      {id:"f1-a",label:"Acolher e explorar",text:"Entendo que essa situação esteja te frustrando. Gostaria de compreender melhor o que tem levado você a se sentir assim.",s:[3,2,1,0],next:"f2a",fl:[],
+       beh:"Reconheceu a frustração e abriu espaço com uma pergunta aberta.",
+       eff:"Marina baixa a guarda e começa a contar o que viveu, mas ainda não sabe qual é a pauta da conversa.",
+       adj:"Depois de ouvir, explicite o motivo da conversa para não deixar a pauta implícita.",
+       tip:"Comece por uma pergunta aberta quando a pessoa chegar com uma emoção forte, e sinalize o objetivo em seguida."},
+      {id:"f1-b",label:"Reconhecer e pautar resultados",text:"Reconheço suas entregas, mas precisamos conversar sobre alguns resultados que estão abaixo do esperado.",s:[1,1,3,1],next:"f2b",fl:[],
+       beh:"Reconheceu o histórico e apresentou a pauta com objetividade, sem detalhar fatos.",
+       eff:"Marina percebe a pauta, mas considera a expressão “abaixo do esperado” vaga e pede exemplos.",
+       adj:"Traga um ou dois fatos específicos para tornar a observação verificável.",
+       tip:"Use fatos observáveis (datas, entregas) em vez de rótulos como “abaixo do esperado”."},
+      {id:"f1-c",label:"Apresentar fatos e direcionar",text:"Entendo. Nas últimas quatro semanas foram três relatórios atrasados e dois com retrabalho. Quero entender o que está acontecendo e combinar como voltamos ao padrão.",s:[1,0,3,2],next:"f2c",fl:[],
+       beh:"Foi direto com fatos e deixou claro o objetivo, sem reconhecer a percepção dela.",
+       eff:"Marina reage com defensividade: acha que só os números são contados, e não o contexto.",
+       adj:"Combine os fatos com uma frase de reconhecimento da experiência dela.",
+       tip:"Fatos claros ajudam, mas funcionam melhor quando a pessoa sente que o contexto também será ouvido."}]},
+    f2a:{step:2,prompt:"Marina começou a se abrir. Como você conduz a escuta?",hint:"Verificar se você entendeu pode ser mais útil do que oferecer uma solução imediata.",
+      v:[{m:3,l:[["marina","É que desde que a Paula saiu e o fluxo mudou, ficou tudo mais pesado. Eu assumi parte do trabalho dela e ninguém perguntou se eu dava conta. Aí atrasa um relatório e isso aparece na reunião."]]}],o:F2_OPTS},
+    f2b:{step:2,prompt:"Marina pediu mais clareza. Como você conduz a escuta?",hint:"Quando a pessoa contesta, confirmar o entendimento ajuda a trazer fatos para a mesa.",
+      v:[{m:2,l:[["marina","Reconhecer é bom, mas “resultados abaixo do esperado” é vago. Quais resultados? Eu entreguei o que me pediram, só que com prazo apertado, depois que a Paula saiu."]]}],o:F2_OPTS},
+    f2c:{step:2,prompt:"Marina reagiu com defensividade. Como você retoma a conversa?",hint:"Pense no que reduz a sensação de ameaça sem abrir mão da pauta.",
+      v:[{m:2,l:[["marina","Os atrasos eu sei. Mas ninguém considera que o fluxo mudou e que eu assumi o trabalho da Paula sem combinar nada. Parece que só contam os números."]]}],o:F2_OPTS},
+    f3:{step:3,prompt:"Marina trouxe informações novas. Como você aprofunda e alinha expectativas?",
+      hint:"Diferencie fatos observáveis de interpretações, e pense em quem deve decidir o quê.",
+      v:[{w:{flag:"clarified"},m:4,l:[["marina","Isso mesmo. E tem outra coisa: o sistema novo exige duas validações que antes não existiam. Eu perdia horas nisso e nem sabia a quem pedir ajuda."]]},
+         {w:{flag:"rushed"},m:3,l:[["marina","Posso me esforçar, mas não sei se consigo manter tudo. Já tentei avisar no canal da equipe e acabou ficando sem resposta."]]},
+         {m:3,l:[["marina","Obrigada por ouvir. Mas, no fim, os relatórios continuam atrasados e eu não sei o que esperam de mim agora."]]}],
+      o:[
+      {id:"f3-a",label:"Explorar o que trava cada entrega",text:"Obrigado por trazer isso. Vou olhar a demanda das validações com o time. Para eu entender melhor: quais entregas estão mais críticas e o que trava cada uma?",s:[3,1,1,2],next:"f4",fl:["explored"],
+       beh:"Mostrou interesse nas causas e assumiu uma ação concreta, perguntando por fatos.",
+       eff:"Marina se sente ouvida e detalha as dependências, o que dá a você informação para decidir.",
+       adj:"Ao final, deixe claro o que você espera, para a exploração não ficar sem critério.",
+       tip:"Perguntar “o que trava cada entrega” gera dados concretos e evita julgamentos."},
+      {id:"f3-b",label:"Dizer a expectativa e priorizar juntos",text:"Quero ser claro sobre o que preciso: relatórios dentro do prazo e sem retrabalho. Ao mesmo tempo, sei que o contexto mudou. Podemos revisar juntos o que dá para priorizar?",s:[1,1,3,2],next:"f4",fl:["expected"],
+       beh:"Comunicou a expectativa com clareza e a ligou ao contexto, convidando à priorização conjunta.",
+       eff:"Marina entende o que se espera e percebe abertura para negociar prioridades.",
+       adj:"Inclua uma pergunta sobre o que ela já tentou, para valorizar as iniciativas dela.",
+       tip:"Dizer a expectativa e reconhecer o contexto na mesma frase reduz a defensividade."},
+      {id:"f3-c",label:"Redistribuir tarefas",text:"Compreendo. Vou redistribuir parte das tarefas para outra pessoa da equipe e você foca nos relatórios.",s:[0,1,1,3],next:"f4",fl:["redistributed"],
+       beh:"Agiu rápido para aliviar a carga, sem consultar Marina sobre a solução.",
+       eff:"A carga diminui, mas Marina não participou da decisão e pode interpretar como falta de confiança.",
+       adj:"Consulte a pessoa antes de decidir sobre a divisão do trabalho dela.",
+       tip:"Soluções unilaterais resolvem o problema do dia, mas reduzem o senso de autonomia."}]},
+    f4:{step:4,prompt:"É o momento de construir encaminhamentos com Marina. Como você conduz?",
+      hint:"Avalie se a resposta ajuda a construir um próximo passo concreto e se a pessoa participa dele.",
+      v:[{w:{flag:"redistributed"},m:2,l:[["marina","Redistribuir... entendo, mas não fui consultada. Isso quer dizer que não confiam que eu consigo?"]]},
+         {w:{trustMin:6},m:4,l:[["marina","Faz sentido. Se a gente priorizar, acho que consigo recuperar. Só preciso saber o que posso deixar para depois."]]},
+         {m:3,l:[["marina","Certo. Mas vamos combinar de forma objetiva, porque eu não quero repetir os atrasos."]]}],
+      o:[
+      {id:"f4-a",label:"Propor e convidar ajustes",text:"Proponho assim: nas próximas duas semanas você prioriza os dois relatórios críticos, eu renego as demais entregas com a área e revisamos o fluxo das validações. O que você ajustaria nessa proposta?",s:[1,1,2,3],next:"f5",fl:["coconstructed"],
+       beh:"Apresentou uma proposta concreta e convidou a pessoa a ajustá-la.",
+       eff:"Marina responde com ajustes realistas e assume parte do compromisso.",
+       adj:"Confirme também o que será renegociado e como você informará a ela.",
+       tip:"Proponha e pergunte. Um plano que a pessoa ajusta costuma ser mais cumprido."},
+      {id:"f4-b",label:"Definir as prioridades sozinho",text:"Vamos fazer o seguinte: você me manda a lista de tudo o que está sob sua responsabilidade e eu defino as prioridades.",s:[1,0,2,2],next:"f5",fl:["directive"],
+       beh:"Assumiu a decisão de priorização, com clareza, mas sem envolver a pessoa.",
+       eff:"Há um encaminhamento claro, mas Marina fica com pouca participação nas escolhas.",
+       adj:"Peça a visão dela sobre as prioridades antes de decidir.",
+       tip:"Decidir sozinho é eficiente, mas pode reduzir o comprometimento de quem executa."},
+      {id:"f4-c",label:"Perguntar sobre ritmo sustentável",text:"Antes de definirmos prazos, quero saber o que você considera um ritmo sustentável e que apoio faria diferença para você.",s:[3,2,1,1],next:"f5",fl:["explore2"],
+       beh:"Aprofundou a escuta sobre condições de trabalho antes de fechar prazos.",
+       eff:"Marina valoriza a pergunta e traz sugestões, mas ainda não existe um combinado concreto.",
+       adj:"Transforme as sugestões em ações com prazo e responsável.",
+       tip:"Perguntar pelo que é sustentável ajuda, desde que você converta as respostas em compromissos."}]},
+    f5:{step:5,prompt:"A conversa está terminando. Como você fecha?",
+      hint:"Pense em como a pessoa sairá da sala: ela sabe o que vai acontecer, quando e com quem?",
+      v:[{w:{agreeMin:4},m:4,l:[["marina","Combinado. Ter prioridade clara já tira um peso. Posso te mandar um resumo no fim do dia?"]]},
+         {w:{trustMin:5},m:3,l:[["marina","Ok, parece um caminho. Só não sei bem como vamos acompanhar isso."]]},
+         {m:2,l:[["marina","Tudo bem. Vou tentar. Só espero que, desta vez, as coisas fiquem claras."]]}],
+      o:[
+      {id:"f5-a",label:"Fechar com combinados e acompanhamento",text:"Para fechar: prioridades da quinzena, apoio nas validações e uma conversa de acompanhamento na próxima quinta, com 20 minutos. Se fizer sentido, você me envia hoje um resumo e eu confirmo.",s:[1,1,2,3],next:"END",fl:["closed"],
+       beh:"Consolidou responsabilidades, prazos e acompanhamento, e pediu confirmação.",
+       eff:"Marina sai sabendo o que fazer e quando haverá retorno.",
+       adj:"Acrescente uma frase reconhecendo o esforço dela para fechar também a dimensão emocional.",
+       tip:"Encerre com o quê, quem e quando, e registre por escrito."},
+      {id:"f5-b",label:"Agradecer e manter a porta aberta",text:"Obrigado pela conversa franca, Marina. Reconheço o quanto você tem se dedicado. Vamos seguindo e, se precisar, você me chama.",s:[1,3,1,0],next:"END",fl:["warmClose"],
+       beh:"Valorizou a dedicação e a franqueza, sem detalhar próximos passos.",
+       eff:"Marina se sente reconhecida, mas sai sem clareza sobre acompanhamento.",
+       adj:"Inclua datas e responsabilidades para dar lastro ao acolhimento.",
+       tip:"Reconhecimento sem encaminhamento tende a se dissipar. Marque a próxima conversa."},
+      {id:"f5-c",label:"Pedir a síntese dela e combinar acompanhamento",text:"Antes de encerrar: o que você leva desta conversa e o que ficou em aberto para você? Depois combinamos o acompanhamento.",s:[3,1,1,2],next:"END",fl:["asked"],
+       beh:"Verificou a compreensão da pessoa e deixou o acompanhamento para depois da síntese.",
+       eff:"Marina resume o que entendeu e traz uma dúvida pendente que você pode tratar na hora.",
+       adj:"Registre o acompanhamento ainda nesta conversa, com data.",
+       tip:"Pedir a síntese da outra pessoa revela mal-entendidos antes que virem problema."}]}
+  },
+  endings:{
+    constructive:{m:5,l:[["marina","Saio mais leve. Ter prioridades claras e poder pedir ajuda muda bastante. Te mando o resumo hoje."]],
+      narr:"A conversa terminou com compreensão mútua. Marina entendeu o que se espera, sentiu que o contexto foi considerado e saiu com um plano de curto prazo e acompanhamento marcado."},
+    partial:{m:3,l:[["marina","Ok, vamos ver como fica. Ainda tenho dúvidas sobre como isso vai funcionar na prática."]],
+      narr:"Alguns pontos foram tratados, mas permaneceram dúvidas sobre prioridades e acompanhamento. A relação está preservada, e os acordos ainda precisam ser detalhados."},
+    critical:{m:1,l:[["marina","Entendi. Vou fazer o possível, mas sinceramente não sei se esta conversa mudou alguma coisa."]],
+      narr:"A conversa terminou com resistência e pouca confiança. Marina saiu sem clareza sobre expectativas e com a sensação de não ter sido ouvida. Uma nova conversa será necessária."}},
+  notes:[
+    {w:{flag:"clarified"},t:"A paráfrase no momento 2 trouxe fatos novos e aprofundou a conversa."},
+    {w:{flag:"comforted"},t:"O acolhimento sem pauta, no momento 2, deixou Marina sem saber o que seria tratado."},
+    {w:{flag:"rushed"},t:"A pressa por prazos logo após o relato de Marina reduziu a abertura dela."},
+    {w:{flag:"redistributed"},t:"A redistribuição de tarefas sem consulta, no momento 3, foi percebida como falta de confiança."},
+    {w:{flagAny:["coconstructed","closed"]},t:"Os combinados construídos com Marina, com prazos e acompanhamento, deram previsibilidade ao desfecho."}],
+  rules:{critical:[{trustMax:5},{agreeMax:2}],constructive:{trustMin:8,agreeMin:5,scoreMin:60}}
+},
+/* ------------------------------------------------------------------ */
+conflito:{
+  id:"conflito",title:"Gestão de conflitos",difficulty:3,minutes:"12 a 18",
+  summary:"Dois profissionais da equipe têm divergências recorrentes que prejudicam a colaboração. Você conduz uma conversa de mediação.",
+  tags:["Escuta ativa","Mediação","Comunicação","Resolução de conflitos"],
+  start:"c1",
+  chars:{
+    andre:{name:"André Ribeiro",ini:"AR",role:"Desenvolvedor Sênior",tone:"a1",profile:"Oito anos de experiência. Valoriza autonomia e previsibilidade no planejamento das entregas."},
+    bea:{name:"Beatriz Nogueira",ini:"BN",role:"Analista de Produto",tone:"a2",profile:"Quatro anos na empresa. Valoriza alinhamento com o cliente e visibilidade sobre as decisões do time."}},
+  brief:{
+    context:"Na Lumina Solutions, o squad Plataforma reúne desenvolvimento e produto. A equipe trabalha em ciclos curtos de duas semanas, e as demandas do cliente mudam com frequência.",
+    situation:"André e Beatriz têm trocas tensas há alguns meses. Ele percebe mudanças de escopo no meio do ciclo. Ela percebe entregas publicadas sem passar pela revisão de produto. As reuniões têm ficado cada vez mais difíceis, e outros membros do time relataram desconforto.",
+    goal:"Mediar uma conversa entre os dois, ajudando-os a compreender as necessidades um do outro e a construir acordos de trabalho que ambos consigam cumprir.",
+    tips:["Você conduz a conversa com os dois ao mesmo tempo.","Nenhum deles é “o problema”: ambos têm razões legítimas e necessidades.","Observe como suas decisões afetam a confiança de cada um no processo."]},
+  steps:["Abertura da mediação","Escuta dos dois lados","Aprofundar necessidades","Construir acordos","Fechamento e acompanhamento"],
+  scenes:{
+    c1:{step:1,prompt:"Os dois chegaram à reunião e já começaram a expor posições. Como você abre a mediação?",
+      hint:"Uma abertura define o clima: pense em regras, objetivo e em como cada pessoa será ouvida.",
+      v:[{m:2,l:[["andre","Vou direto: mudanças de escopo no meio do ciclo estão destruindo o meu planejamento."],["bea","E eu preciso que as entregas respeitem o que o cliente pediu. Já faz meses que a gente se desencontra."]]}],
+      o:[
+      {id:"c1-a",label:"Estabelecer regras e começar por fatos",text:"Obrigado por virem. Quero que cada um possa falar sem interrupção e que a gente saia com combinados. Vamos começar por cada um descrever, em fatos, uma situação recente que ilustre o problema.",s:[2,1,3,1],next:"c2a",fl:["ground"],
+       beh:"Definiu propósito e regras de conversa e pediu relatos em fatos observáveis.",
+       eff:"Os dois se organizam, e a conversa passa a ter turnos e foco em situações concretas.",
+       adj:"Reconheça rapidamente a tensão que os dois trouxeram para dar legitimidade ao que sentem.",
+       tip:"Na mediação, regras simples de fala e foco em fatos reduzem o ruído desde o início."},
+      {id:"c1-b",label:"Apontar o processo como causa",text:"Pelos registros, parte dos desencontros vem do processo de mudança de escopo, que não está claro. Vamos olhar para isso.",s:[0,1,2,2],next:"c2b",fl:["processFirst"],
+       beh:"Antecipou um diagnóstico sobre o processo antes de ouvir os dois.",
+       eff:"André e Beatriz discordam do diagnóstico e voltam a trocar acusações, cada um defendendo sua versão.",
+       adj:"Ouça cada versão antes de propor uma explicação.",
+       tip:"Diagnósticos antecipados costumam ser contestados. Primeiro escute, depois conclua."},
+      {id:"c1-c",label:"Ouvir como cada um vive a situação",text:"Antes dos fatos, quero ouvir como cada um tem vivido isso no dia a dia.",s:[3,3,1,0],next:"c2c",fl:["feelings"],
+       beh:"Abriu espaço para vivências e sentimentos, sem estruturar a conversa.",
+       eff:"Os dois falam com franqueza sobre o impacto pessoal, o que aproxima, mas a conversa ainda não tem direção.",
+       adj:"Combine escuta de sentimentos com a organização dos turnos e do objetivo.",
+       tip:"Perguntar como a pessoa vive a situação cria abertura. Marque também para onde a conversa vai."}]},
+    c2a:{step:2,prompt:"Os dois descreveram fatos recentes. Como você conduz a escuta?",hint:"Reflita o que ouviu de cada lado antes de decidir o que fazer com isso.",
+      v:[{m:3,l:[["andre","Dia 12, a Beatriz alterou três critérios na terça do ciclo. Eu tinha acabado de fechar a modelagem."],["bea","E no dia 14, o André publicou a tela sem passar pela revisão de produto, e o cliente reclamou."]]}],o:null},
+    c2b:{step:2,prompt:"Os dois contestaram seu diagnóstico. Como você retoma a conversa?",hint:"Quando as posições endurecem, volte a atenção às necessidades por trás delas.",
+      v:[{m:2,l:[["bea","Concordo que o processo é confuso, mas isso não explica entregas sem revisão."],["andre","Nem mudanças em cima da hora. Processo é desculpa para ninguém assumir nada."]]}],o:null},
+    c2c:{step:2,prompt:"Os dois falaram de sentimentos. Como você conduz a partir daí?",hint:"Sentimentos abrem espaço. Pense em como ligá-los a situações e necessidades.",
+      v:[{m:3,l:[["andre","Honestamente, me sinto desrespeitado quando minhas estimativas são ignoradas."],["bea","E eu me sinto sem voz quando entregam sem me ouvir. Mas não quero que isso vire pessoal."]]}],o:null},
+    c3:{step:3,prompt:"As necessidades começam a aparecer. Como você aprofunda?",
+      hint:"Pense em como ajudar os dois a enxergarem interesses em comum, sem apontar quem está certo.",
+      v:[{w:{flag:"ruleImposed"},m:3,l:[["andre","Regras eu já ouvi. Mas quem decide quando uma mudança é urgente?"],["bea","E quem garante que a revisão não vira gargalo?"]]},
+         {w:{flag:"needs"},m:4,l:[["bea","Eu precisaria que ele me avisasse antes de fechar uma decisão técnica que muda o fluxo."],["andre","E eu precisaria de previsibilidade: se o escopo muda, o prazo também muda."]]},
+         {m:4,l:[["andre","Posso concordar em revisar antes de publicar, desde que a revisão tenha prazo."],["bea","E eu posso avisar mudanças mais cedo, mas nem sempre o cliente me dá tempo."]]}],
+      o:[
+      {id:"c3-a",label:"Convidar os dois a desenhar regras",text:"Vejo uma necessidade comum: previsibilidade e alinhamento. Que tal cada um propor uma regra simples que atenderia o outro, e avaliamos juntos?",s:[1,1,2,3],next:"c4",fl:["jointDesign"],
+       beh:"Destacou o interesse comum e envolveu os dois na criação de soluções.",
+       eff:"Os dois propõem regras que atendem ao outro e passam a conversar como parceiros na solução.",
+       adj:"Cheque se as regras propostas são realistas para a rotina do time.",
+       tip:"Envolver as duas partes na criação das regras aumenta o cumprimento."},
+      {id:"c3-b",label:"Pedir explicação a um deles",text:"André, você poderia explicar por que a revisão antes de publicar às vezes é vista como obstáculo?",s:[1,0,2,1],next:"c4",fl:["singledOut"],
+       beh:"Dirigiu a pergunta a uma das pessoas, em um tema em que ele já estava na defensiva.",
+       eff:"André se sente em julgamento e se defende. Beatriz observa, e o equilíbrio da conversa se perde.",
+       adj:"Faça perguntas simétricas aos dois, em turnos equivalentes.",
+       tip:"Em mediação, perguntas assimétricas podem soar como tomada de lado."},
+      {id:"c3-c",label:"Checar como estão e o clima",text:"Antes de seguir, quero checar como vocês estão: está difícil ouvir o que o outro disse?",s:[2,3,1,0],next:"c4",fl:["checkin"],
+       beh:"Cuidou do clima emocional e verificou a capacidade de escuta dos dois.",
+       eff:"Os dois reconhecem o desconforto e demonstram esforço para continuar, mas o ritmo diminui.",
+       adj:"Depois da checagem, retome as necessidades e avance para soluções.",
+       tip:"Checar o clima é útil em momentos de tensão, desde que a conversa retome o rumo."}]},
+    c4:{step:4,prompt:"É hora de construir acordos. Como você conduz?",
+      hint:"Um acordo vale o quanto as duas pessoas conseguem cumprir. Pense em clareza, equilíbrio e acompanhamento.",
+      v:[{w:{flag:"singledOut"},m:2,l:[["andre","Não vou ser o culpado aqui. Se for para mudar só o meu comportamento, não faz sentido."]]},
+         {w:{flag:"jointDesign"},m:4,l:[["bea","Proponho que mudanças de escopo sejam sinalizadas até o segundo dia do ciclo."],["andre","E que a revisão de produto aconteça em até um dia útil. Aí eu consigo planejar."]]},
+         {m:3,l:[["bea","Posso aceitar combinados, mas preciso de clareza sobre o que conta como urgência."],["andre","E eu preciso saber que a regra vale para os dois."]]}],
+      o:[
+      {id:"c4-a",label:"Escrever três acordos juntos",text:"Vamos escrever juntos três acordos: como mudanças de escopo são sinalizadas, prazo de revisão de produto e o que define urgência. Cada um confirma se consegue cumprir.",s:[1,1,2,3],next:"c5",fl:["accords"],
+       beh:"Estruturou os acordos em temas claros e pediu confirmação de cada pessoa.",
+       eff:"Os dois chegam a acordos simétricos e verificáveis, com compromissos mútuos.",
+       adj:"Registre quem acompanha cada acordo e quando ele será revisado.",
+       tip:"Limite os acordos a poucos e específicos, com quem, o quê e quando."},
+      {id:"c4-b",label:"Deixar que os dois se acertem",text:"Fico com o que vocês propuseram. Vocês se acertam entre si e me dizem na próxima semana como ficou.",s:[1,1,1,1],next:"c5",fl:["delegated"],
+       beh:"Confiou na autonomia dos dois, sem estruturar os acordos nem o acompanhamento.",
+       eff:"A autonomia é valorizada, mas os acordos ficam vagos e dependem do esforço individual.",
+       adj:"Combine pelo menos critérios mínimos e uma data de revisão.",
+       tip:"Delegar o acordo funciona melhor com critérios mínimos e checagem marcada."},
+      {id:"c4-c",label:"Garantir que todos foram ouvidos",text:"Antes de fechar acordos, quero garantir que cada um sinta que foi ouvido. O que ainda não foi dito hoje?",s:[3,2,1,1],next:"c5",fl:["reopen"],
+       beh:"Reabriu o espaço de fala para checar pendências emocionais antes dos acordos.",
+       eff:"Surge um ponto que ainda incomodava um dos dois, o que fortalece a relação, mas atrasa os acordos.",
+       adj:"Limite o tempo dessa rodada e retome os acordos em seguida.",
+       tip:"Checar pendências antes de fechar acordos é valioso, se houver tempo para concluí-los."}]},
+    c5:{step:5,prompt:"A reunião está terminando. Como você fecha?",
+      hint:"Os acordos continuarão valendo depois que a conversa acabar. O que ajuda a sustentá-los?",
+      v:[{w:{agreeMin:4},m:4,l:[["andre","Acho que dá para trabalhar assim."],["bea","Se os acordos forem cumpridos dos dois lados, ok para mim."]]},
+         {w:{trustMin:5},m:3,l:[["bea","Vamos tentar. Só não sei como a gente vai acompanhar isso."],["andre","Eu também gostaria de saber o que acontece se algum acordo não for cumprido."]]},
+         {m:2,l:[["andre","Tudo bem. Vamos ver."],["bea","Veremos."]]}],
+      o:[
+      {id:"c5-a",label:"Registrar acordos e marcar revisão",text:"Vou registrar: três acordos, quem faz o quê e uma revisão em duas semanas com os dois. Combinado?",s:[1,1,2,3],next:"END",fl:["closed"],
+       beh:"Consolidou os acordos, responsabilidades e acompanhamento, e pediu confirmação.",
+       eff:"Os dois saem com clareza sobre o que foi combinado e quando será a revisão.",
+       adj:"Acrescente uma frase reconhecendo o esforço de ambos para chegar até aqui.",
+       tip:"Registre os acordos por escrito e marque a revisão antes de encerrar."},
+      {id:"c5-b",label:"Agradecer e confiar no entendimento",text:"Valorizo a abertura de vocês. Acredito que vão se entender melhor daqui para frente.",s:[1,2,1,0],next:"END",fl:["vagueClose"],
+       beh:"Valorizou a participação e expressou confiança, sem definir acompanhamento.",
+       eff:"O clima fica positivo, mas os acordos dependem apenas da boa vontade dos dois.",
+       adj:"Marque a revisão e defina responsabilidades.",
+       tip:"Expressar confiança ajuda, mas não substitui o acompanhamento."},
+      {id:"c5-c",label:"Marcar conversas individuais e revisão",text:"Vou conversar com cada um individualmente esta semana e acompanhar o combinado. Para a revisão conjunta, qual data funciona para vocês?",s:[2,1,1,3],next:"END",fl:["followUp"],
+       beh:"Combinou acompanhamento individual e coletivo, envolvendo os dois na data.",
+       eff:"Os dois percebem cuidado com o cumprimento dos acordos e com os sentimentos de cada um.",
+       adj:"Registre também o que será acompanhado em cada conversa individual.",
+       tip:"Conversas individuais após a mediação ajudam a identificar ajustes que não aparecem em grupo."}]}
+  },
+  endings:{
+    constructive:{m:5,l:[["andre","Acho que agora temos regras que fazem sentido. Vou cumprir a minha parte."],["bea","Eu também. Obrigada por conduzir a conversa."]],
+      narr:"A conversa terminou com compreensão mútua. André e Beatriz reconheceram as necessidades um do outro e saíram com acordos simétricos, responsáveis definidos e revisão marcada."},
+    partial:{m:3,l:[["bea","Foi uma conversa útil, mas ainda tenho dúvida se vai funcionar na prática."],["andre","Vamos ver nas próximas semanas."]],
+      narr:"Alguns pontos foram tratados, mas permaneceram dúvidas sobre o cumprimento dos acordos. A tensão diminuiu, e o acompanhamento será decisivo."},
+    critical:{m:1,l:[["andre","Se isso for só cobrança, prefiro levar a outra instância."],["bea","Acho que vamos precisar de mais uma mediação."]],
+      narr:"A conversa terminou com resistência e perda de confiança no processo. Os dois saíram com a sensação de que suas necessidades não foram plenamente ouvidas, e uma nova mediação será necessária."}},
+  notes:[
+    {w:{flag:"ground"},t:"As regras de conversa e o foco em fatos, no momento 1, organizaram a participação dos dois."},
+    {w:{flag:"processFirst"},t:"O diagnóstico antecipado sobre o processo, no momento 1, gerou contestação dos dois lados."},
+    {w:{flag:"ruleImposed"},t:"A regra proposta no momento 2, antes de ouvir as necessidades, foi vista com ceticismo."},
+    {w:{flag:"singledOut"},t:"A pergunta dirigida apenas a André, no momento 3, foi percebida como tomada de lado."},
+    {w:{flagAny:["jointDesign","accords"]},t:"A construção conjunta de regras e acordos aumentou o compromisso dos dois."}],
+  rules:{critical:[{trustMax:5},{agreeMax:2}],constructive:{trustMin:8,agreeMin:5,scoreMin:60}}
+},
+/* ------------------------------------------------------------------ */
+carreira:{
+  id:"carreira",title:"Desenvolvimento de carreira",difficulty:2,minutes:"10 a 15",
+  summary:"Uma colaboradora com bom histórico está frustrada por não ter sido promovida e questiona suas possibilidades de crescimento.",
+  tags:["Empatia","Clareza","Desenvolvimento de pessoas","Construção de acordos"],
+  start:"r1",
+  chars:{camila:{name:"Camila Duarte",ini:"CD",role:"Analista Sênior de Marketing",tone:"a2",
+    profile:"Quatro anos na empresa e entregas acima da meta há dois anos. Valoriza transparência, reconhecimento e acordos concretos de desenvolvimento."}},
+  brief:{
+    context:"Na Lumina Solutions, as promoções são avaliadas duas vezes por ano, com critérios definidos pela diretoria: liderança de projetos transversais, visão estratégica e desenvolvimento de pessoas.",
+    situation:"No último ciclo, Camila não foi incluída na lista de promoções. Ela soube pelos colegas e pediu uma conversa. Você já havia comentado informalmente que ela estava bem avaliada, mas nunca detalhou os critérios com ela.",
+    goal:"Conduzir uma conversa transparente sobre carreira, reconhecer a frustração, esclarecer critérios e construir com Camila um plano de desenvolvimento com acordos concretos.",
+    tips:["Seja realista sobre o que está ou não sob seu controle.","Evite prometer resultados que dependem de outras instâncias.","As reações de Camila mudam conforme a transparência e os compromissos que você assume."]},
+  steps:["Acolher a frustração","Explorar expectativas e critérios","Clareza sobre a situação atual","Construir o plano de desenvolvimento","Fechamento e acordos"],
+  scenes:{
+    r1:{step:1,prompt:"Camila abriu a conversa com franqueza. Como você responde?",
+      hint:"Pense em quanto da frustração precisa ser ouvida antes de explicar qualquer decisão.",
+      v:[{m:2,l:[["camila","Vou ser direta: soube da promoção e não fui incluída. Entrego acima da meta há dois anos. Quero entender o que falta, ou se existe mesmo espaço para mim aqui."]]}],
+      o:[
+      {id:"r1-a",label:"Acolher e ouvir as expectativas",text:"Entendo a frustração, e agradeço a franqueza. Antes de falar de critérios, quero ouvir o que você esperava deste ciclo e o que isso significa para você.",s:[3,3,1,0],next:"r2a",fl:[],
+       beh:"Reconheceu a frustração, valorizou a franqueza e perguntou pelas expectativas.",
+       eff:"Camila se sente respeitada e fala com mais profundidade sobre o que esperava, mas ainda aguarda explicações.",
+       adj:"Depois de ouvir, traga informações sobre os critérios, para não prolongar a incerteza.",
+       tip:"Quando a pessoa chega com uma expectativa frustrada, ouvir primeiro costuma abrir a conversa."},
+      {id:"r1-b",label:"Explicar os critérios avaliados",text:"Seu desempenho é sólido, e isso não está em questão. A decisão considerou critérios de liderança e atuação transversal. Posso detalhar o que foi avaliado.",s:[1,1,3,2],next:"r2b",fl:[],
+       beh:"Reconheceu o desempenho e ofereceu transparência sobre os critérios.",
+       eff:"Camila valoriza a clareza, mas estranha que os critérios nunca tenham sido combinados antes.",
+       adj:"Reconheça também o impacto de ela ter descoberto pelos colegas.",
+       tip:"Informação clara é importante, e funciona melhor depois de reconhecer a emoção."},
+      {id:"r1-c",label:"Explicar limites e olhar para o próximo ciclo",text:"Entendo, mas promoções dependem de orçamento e de decisões da diretoria, que fogem ao meu controle. Posso te ajudar a se preparar para o próximo ciclo.",s:[0,1,2,2],next:"r2c",fl:["deflect"],
+       beh:"Explicou limites institucionais e ofereceu apoio para o futuro, sem explorar a perspectiva dela.",
+       eff:"Camila entende que a decisão não depende dela, e isso a leva a questionar se vale o esforço.",
+       adj:"Combine a transparência sobre limites com perguntas sobre o que ela busca.",
+       tip:"Explicar limites é legítimo, mas pode soar como distanciamento se não vier acompanhado de escuta."}]},
+    r2a:{step:2,prompt:"Camila contou o que esperava. Como você segue?",hint:"Pense em responsabilidade: o que você poderia ter feito diferente nesse processo?",
+      v:[{m:3,l:[["camila","Eu esperava que o trabalho dos últimos dois anos fosse suficiente. E o que mais me incomoda é que nunca me disseram quais eram os critérios."]]}],o:null},
+    r2b:{step:2,prompt:"Camila questionou a falta de combinados anteriores. Como você segue?",hint:"Existem coisas que cabem a você assumir. Pense em como fazê-lo sem perder credibilidade.",
+      v:[{m:2,l:[["camila","Entendi que existem critérios, mas é a primeira vez que ouço falar em liderança transversal. Isso deveria ter sido combinado antes."]]}],o:null},
+    r2c:{step:2,prompt:"Camila questionou o sentido do esforço. Como você responde?",hint:"Quando a pessoa pensa em desistir, o que ela mais precisa é entender o que depende dela.",
+      v:[{m:1,l:[["camila","Ou seja, não depende de mim. Então por que eu me esforço? Se for assim, prefiro olhar outras oportunidades."]]}],o:null},
+    r3:{step:3,prompt:"É hora de dar clareza sobre a situação atual. Como você conduz?",
+      hint:"Transparência não é prometer. Pense no que é fato, o que é avaliação sua e o que depende de terceiros.",
+      v:[{w:{flag:"admitted"},m:4,l:[["camila","Agradeço a transparência. Então, quais são exatamente os critérios e onde eu estaria hoje em cada um?"]]},
+         {w:{flag:"explored"},m:3,l:[["camila","Gostaria de liderar projetos maiores e ter mais voz nas decisões de campanha. Mas não sei se a empresa me enxerga assim."]]},
+         {m:2,l:[["camila","Palavras bonitas, mas preciso de algo concreto. Se sou importante, o que muda?"]]}],
+      o:[
+      {id:"r3-a",label:"Detalhar critérios com exemplos",text:"Os critérios são liderança de projetos transversais, visão estratégica e desenvolvimento de pessoas. Hoje você está forte em execução e tem espaço para ampliar a liderança e a visão estratégica. Posso te dar exemplos concretos de cada ponto.",s:[1,1,3,2],next:"r4",fl:["criteria"],
+       beh:"Apresentou critérios e uma avaliação honesta, com oferta de exemplos concretos.",
+       eff:"Camila passa a enxergar onde está e onde pode evoluir, o que a ajuda a decidir seus próximos passos.",
+       adj:"Pergunte como ela se vê em cada critério, para equilibrar a sua avaliação com a dela.",
+       tip:"Critérios claros e exemplos concretos transformam frustração em direção."},
+      {id:"r3-b",label:"Estimar a distância até a promoção",text:"Minha avaliação honesta é que você está a um ou dois projetos de reunir as condições. Mas preciso confirmar isso com a diretoria.",s:[1,1,2,2],next:"r4",fl:["estimate"],
+       beh:"Compartilhou uma estimativa pessoal e sinalizou a dependência de outra instância.",
+       eff:"Camila se anima, mas pode interpretar a estimativa como promessa, e isso cria risco de nova frustração.",
+       adj:"Deixe explícito que é uma avaliação sua e não um compromisso da empresa.",
+       tip:"Estimativas ajudam se vierem com ressalvas claras sobre o que você não controla."},
+      {id:"r3-c",label:"Propor construir um plano",text:"Vamos construir um plano: o que você precisa desenvolver, que oportunidades posso abrir e quando revisamos. Antes, qual dessas áreas mais te interessa?",s:[2,1,1,3],next:"r4",fl:["plan"],
+       beh:"Deslocou o foco para o futuro e convidou Camila a escolher onde desenvolver.",
+       eff:"Camila gosta da perspectiva de ação, embora ainda queira saber os critérios formais.",
+       adj:"Antes de montar o plano, traga os critérios formais para dar base.",
+       tip:"Planos de desenvolvimento funcionam melhor quando a pessoa conhece os critérios."}]},
+    r4:{step:4,prompt:"É o momento de construir o plano de desenvolvimento. Como você conduz?",
+      hint:"Avalie se a resposta combina oportunidades, responsabilidades e uma forma de acompanhar o progresso.",
+      v:[{w:{flag:"estimate"},m:2,l:[["camila","Mais um ou dois projetos... isso é uma promessa? Já ouvi isso antes."]]},
+         {w:{flagAny:["plan","criteria"]},m:4,l:[["camila","Gostei de ter algo estruturado. Mas preciso saber prazos e quem decide."]]},
+         {m:3,l:[["camila","Certo. Mas o que exatamente vai mudar, e quando?"]]}],
+      o:[
+      {id:"r4-a",label:"Propor oportunidade, acesso e revisão",text:"Proponho: você lidera a campanha de lançamento no próximo trimestre, eu abro acesso às reuniões com a diretoria, e revisamos juntos sua evolução em 90 dias com critérios escritos.",s:[1,1,2,3],next:"r5",fl:["concretePlan"],
+       beh:"Propôs ações com oportunidade, acesso e prazo de revisão, apoiadas em critérios escritos.",
+       eff:"Camila percebe compromisso real e propõe ajustes de escopo, o que fortalece o acordo.",
+       adj:"Pergunte se a proposta atende aos interesses dela, para ajustá-la com ela.",
+       tip:"Combine oportunidade, acesso e revisão: assim o plano deixa de ser promessa."},
+      {id:"r4-b",label:"Levar o caso à diretoria",text:"Vou levar seu caso à diretoria e te dou retorno. Não posso garantir o resultado, mas vou defender o seu nome.",s:[1,1,1,1],next:"r5",fl:["takeUp"],
+       beh:"Assumiu o papel de advogar por ela, sem definir ações nem prazos de desenvolvimento.",
+       eff:"Camila valoriza o apoio, mas segue sem saber o que fazer enquanto aguarda.",
+       adj:"Combine ações próprias para o período de espera.",
+       tip:"Advogar pela pessoa ajuda. Combine também o que ela pode fazer enquanto aguarda."},
+      {id:"r4-c",label:"Checar se os próximos passos fazem sentido",text:"Antes de definirmos, quero saber se esses próximos passos fazem sentido para você ou se faltou algo importante.",s:[3,2,1,1],next:"r5",fl:["check"],
+       beh:"Verificou a adequação dos passos à perspectiva dela antes de formalizar.",
+       eff:"Camila acrescenta um ponto sobre exposição a decisões estratégicas, que ainda não estava no plano.",
+       adj:"Transforme os pontos levantados em ações com prazos.",
+       tip:"Checar o sentido do plano para a pessoa evita acordos que ela não sustentará."}]},
+    r5:{step:5,prompt:"A conversa está terminando. Como você fecha?",
+      hint:"Pense em como Camila vai se lembrar do que foi combinado e em como saberá se ele está sendo cumprido.",
+      v:[{w:{agreeMin:4},m:4,l:[["camila","Combinado. Com metas e datas eu consigo me planejar. Posso te enviar um resumo?"]]},
+         {w:{trustMin:5},m:3,l:[["camila","Ok. Só espero que isso saia do papel."]]},
+         {m:2,l:[["camila","Tudo bem. Vou pensar com calma nas minhas opções."]]}],
+      o:[
+      {id:"r5-a",label:"Fechar com acordos e datas",text:"Para fechar: você lidera a campanha, eu abro o acesso à diretoria, e revisamos em 90 dias com os critérios. Vou te enviar isso por escrito ainda hoje. Faz sentido?",s:[1,1,2,3],next:"END",fl:["closed"],
+       beh:"Consolidou os acordos com responsáveis, prazos e registro escrito.",
+       eff:"Camila sai com clareza sobre o que será feito, por quem e quando.",
+       adj:"Inclua uma frase de reconhecimento pelo desempenho dela.",
+       tip:"Envie por escrito o que foi combinado no mesmo dia."},
+      {id:"r5-b",label:"Valorizar e manter contato",text:"Valorizo você e confio no seu potencial. Vamos conversando.",s:[1,2,1,0],next:"END",fl:["vagueClose"],
+       beh:"Expressou valorização e confiança, sem acordos específicos.",
+       eff:"Camila se sente valorizada, mas sai sem compromissos concretos.",
+       adj:"Combine datas e responsáveis antes de encerrar.",
+       tip:"Valorização é importante, e precisa vir com ações observáveis."},
+      {id:"r5-c",label:"Perguntar como ela sai da conversa",text:"Para fechar: como você está saindo desta conversa, e o que precisa de mim para confiar no combinado?",s:[3,2,1,1],next:"END",fl:["asked"],
+       beh:"Verificou o estado emocional e as necessidades dela para sustentar o acordo.",
+       eff:"Camila verbaliza o que precisa e você pode ajustar os acordos na hora.",
+       adj:"Registre o que foi dito e inclua uma data de revisão.",
+       tip:"Perguntar o que a pessoa precisa para confiar no combinado é uma forma eficaz de fechar."}]}
+  },
+  endings:{
+    constructive:{m:5,l:[["camila","Obrigada pela transparência. Com metas e datas, consigo planejar e acreditar no próximo passo."]],
+      narr:"A conversa terminou com compreensão mútua. Camila entendeu os critérios, reconheceu a transparência e saiu com um plano de desenvolvimento com oportunidades, prazos e revisão marcada."},
+    partial:{m:3,l:[["camila","Entendi alguns pontos, mas ainda quero ver se isso se concretiza."]],
+      narr:"Alguns pontos foram esclarecidos, mas persistem dúvidas sobre o que será feito e quando. A confiança está em construção, e os acordos precisam ser detalhados."},
+    critical:{m:1,l:[["camila","Vou pensar com calma nas minhas opções. Obrigada pelo tempo."]],
+      narr:"A conversa terminou com perda de confiança. Camila saiu sem clareza sobre critérios e sem acordos concretos, e há risco de ela buscar oportunidades fora. Uma nova conversa será necessária."}},
+  notes:[
+    {w:{flag:"deflect"},t:"Explicar apenas os limites institucionais, no momento 1, levou Camila a questionar o sentido do esforço."},
+    {w:{flag:"admitted"},t:"Assumir a falha na comunicação dos critérios, no momento 2, restaurou credibilidade."},
+    {w:{flag:"reassure"},t:"A tranquilização genérica, no momento 2, foi percebida como promessa vazia."},
+    {w:{flag:"estimate"},t:"A estimativa de prazo, no momento 3, gerou expectativa e cautela no momento seguinte."},
+    {w:{flagAny:["concretePlan","closed"]},t:"A combinação de oportunidade, acesso e revisão por escrito deu concretude ao plano."}],
+  rules:{critical:[{trustMax:5},{agreeMax:2}],constructive:{trustMin:8,agreeMin:5,scoreMin:60}}
+}
+};
+
+/* Alternativas compartilhadas dos momentos 2 */
+SCENARIOS.feedback.scenes.f2a.o = SCENARIOS.feedback.scenes.f2b.o = SCENARIOS.feedback.scenes.f2c.o = F2_OPTS;
+const C2_OPTS = [
+  {id:"c2-a",label:"Resumir os dois lados e perguntar",
+   text:"Estou ouvindo duas coisas: mudança de escopo durante o ciclo e entrega sem revisão de produto. Cada um percebe um impacto diferente. Posso resumir assim? Beatriz, o que você precisa que o André saiba sobre a sua parte?",
+   s:[3,2,2,1],next:"c3",fl:["summarized"],
+   beh:"Resumiu os dois pontos de vista de forma simétrica e fez uma pergunta que convida à perspectiva do outro.",
+   eff:{c2a:"Os dois confirmam o resumo e passam a falar do impacto que sentem, em vez de repetirem acusações.",c2b:"O resumo traz os dois de volta aos fatos e reduz a disputa sobre quem tem razão.",c2c:"O resumo liga sentimentos a situações concretas e dá direção à conversa."},
+   adj:"Faça a mesma pergunta ao André, para manter o equilíbrio.",
+   tip:"Resuma os dois lados com a mesma ênfase e pergunte a cada um o que o outro precisa saber."},
+  {id:"c2-b",label:"Propor uma regra imediatamente",
+   text:"Vocês dois têm razão em parte. O importante agora é definir uma regra: mudanças só entram até o segundo dia do ciclo e toda entrega passa por revisão.",
+   s:[0,0,2,3],next:"c3",fl:["ruleImposed"],
+   beh:"Antecipou uma solução e propôs uma regra clara, sem explorar necessidades.",
+   eff:{c2a:"Os dois reagem com cautela: a regra parece razoável, mas não responde a como cada um vive a situação.",c2b:"A regra é recebida como mais uma imposição, e os dois a questionam.",c2c:"A regra interrompe o espaço aberto pelos sentimentos, e os dois recuam."},
+   adj:"Antes de propor regras, entenda o que cada um precisa do outro.",
+   tip:"Regras construídas sem a participação das partes tendem a ser contestadas ou cumpridas só na aparência."},
+  {id:"c2-c",label:"Perguntar o que cada um precisa do outro",
+   text:"Percebo desgaste dos dois lados. Quero que cada um diga o que, na atitude do outro, mais ajudaria na colaboração.",
+   s:[2,2,2,1],next:"c3",fl:["needs"],
+   beh:"Direcionou a conversa para necessidades e pedidos concretos, de forma simétrica.",
+   eff:{c2a:"Os dois formulam pedidos específicos, o que dá material para acordos.",c2b:"A pergunta desloca o foco das acusações para pedidos concretos.",c2c:"Os sentimentos se transformam em pedidos concretos, o que aproxima os dois."},
+   adj:"Verifique se cada um entendeu o pedido do outro antes de avançar.",
+   tip:"Pergunte o que a pessoa precisa, e não o que o outro fez de errado."}
+];
+SCENARIOS.conflito.scenes.c2a.o = SCENARIOS.conflito.scenes.c2b.o = SCENARIOS.conflito.scenes.c2c.o = C2_OPTS;
+const R2_OPTS = [
+  {id:"r2-a",label:"Assumir a falha de comunicação",
+   text:"Você tem razão: os critérios deveriam ter sido combinados com você antes. Isso foi uma falha minha de comunicação. Posso te apresentar agora o que se espera para o próximo nível?",
+   s:[1,2,3,1],next:"r3",fl:["admitted"],
+   beh:"Assumiu a responsabilidade pela falha de comunicação e ofereceu transparência imediata.",
+   eff:{r2a:"Camila reconhece a honestidade e aceita ouvir sobre os critérios com mais disposição.",r2b:"Assumir a falha converte a crítica em abertura, e Camila passa a perguntar pelos critérios.",r2c:"Ao assumir a falha, você devolve a ela a perspectiva de que existe algo a fazer."},
+   adj:"Pergunte também o que ela espera da empresa, para ouvir antes de apresentar.",
+   tip:"Assumir uma falha de comunicação, sem justificativas, costuma restaurar credibilidade."},
+  {id:"r2-b",label:"Perguntar o que ela busca daqui a dois anos",
+   text:"Antes disso, me conta: o que você gostaria de estar fazendo daqui a dois anos? Quero entender o que você busca.",
+   s:[3,2,1,1],next:"r3",fl:["explored"],
+   beh:"Explorou aspirações de carreira com uma pergunta aberta.",
+   eff:{r2a:"Camila descreve interesses de liderança e voz em decisões, o que enriquece a conversa.",r2b:"A pergunta muda o foco da crítica para o futuro, mas deixa a questão dos critérios em aberto.",r2c:"A pergunta reaproxima Camila do futuro, e ela retoma o interesse pela conversa."},
+   adj:"Retome a questão dos critérios para não deixar a crítica dela sem resposta.",
+   tip:"Perguntar sobre aspirações mostra interesse genuíno, mas responda também às dúvidas que ela trouxe."},
+  {id:"r2-c",label:"Tranquilizar e pedir calma",
+   text:"Não quero que você tome decisões precipitadas. Você é importante para a equipe e vamos encontrar uma solução.",
+   s:[1,2,1,0],next:"r3",fl:["reassure"],
+   beh:"Tranquilizou e valorizou a pessoa, sem informação nova nem pergunta.",
+   eff:{r2a:"Camila agradece, mas a resposta não responde à crítica sobre os critérios.",r2b:"Camila percebe a resposta como evasiva e pede algo concreto.",r2c:"A frase não responde ao questionamento sobre o esforço, e Camila pede ações concretas."},
+   adj:"Combine a valorização com informação e uma pergunta sobre o que ela precisa.",
+   tip:"Garantias genéricas são menos eficazes do que informações e compromissos específicos."}
+];
+SCENARIOS.carreira.scenes.r2a.o = SCENARIOS.carreira.scenes.r2b.o = SCENARIOS.carreira.scenes.r2c.o = R2_OPTS;
+
+const OUTCOMES = {
+  constructive:{label:"Desfecho construtivo",cls:"ok",icon:"check"},
+  partial:{label:"Desfecho parcialmente produtivo",cls:"warn",icon:"alert"},
+  critical:{label:"Desfecho crítico",cls:"risk",icon:"alert"}
+};
+const DIFF_LABEL = {1:"Básica",2:"Intermediária",3:"Avançada"};
+
+/* =====================================================================
+   4. UTILITÁRIOS E CONSTRUÇÃO DE DOM
+   Conteúdo dinâmico é inserido com textContent (via h), nunca com innerHTML.
+   ===================================================================== */
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => Array.from(r.querySelectorAll(s));
+const clamp = (n,a,b) => Math.min(b,Math.max(a,n));
+const NS = "http://www.w3.org/2000/svg";
+const reducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const PROPS = ["value","checked","disabled","open","hidden","selected","tabIndex","name","type","id","rows"];
+function h(tag, props, ...kids){
+  const e = document.createElement(tag);
+  if(props) for(const [k,v] of Object.entries(props)){
+    if(v===null||v===undefined||v===false) continue;
+    if(k==="class") e.className=v;
+    else if(k==="text") e.textContent=v;
+    else if(k.startsWith("on")) e.addEventListener(k.slice(2),v);
+    else if(PROPS.includes(k)) e[k]=v;
+    else e.setAttribute(k, v===true?"":String(v));
+  }
+  const add = k => { if(k===null||k===undefined||k===false) return; if(Array.isArray(k)) k.forEach(add); else e.append(k.nodeType?k:document.createTextNode(String(k))); };
+  kids.forEach(add);
+  return e;
+}
+const ICONS = {
+  ear:'<path d="M6 9a6 6 0 1 1 12 0c0 3-2 4-3 6s-1 5-4 5-3-2-3-3"/><path d="M10 9a2 2 0 1 1 4 0"/>',
+  heart:'<path d="M12 20s-7-4.4-9-9a5 5 0 0 1 9-3 5 5 0 0 1 9 3c-2 4.6-9 9-9 9z"/>',
+  chat:'<path d="M21 12a8 8 0 0 1-11.5 7.2L4 20l1-4.5A8 8 0 1 1 21 12z"/>',
+  route:'<circle cx="6" cy="18" r="2.5"/><circle cx="18" cy="6" r="2.5"/><path d="M8.5 18H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  gauge:'<path d="M4 18a9 9 0 1 1 16 0"/><path d="M12 14l4-5"/>',
+  arrow:'<path d="M5 12h14M13 6l6 6-6 6"/>', check:'<path d="M5 12l5 5 9-10"/>',
+  print:'<path d="M7 9V3h10v6"/><rect x="4" y="9" width="16" height="8" rx="2"/><path d="M7 14h10v7H7z"/>',
+  refresh:'<path d="M20 11a8 8 0 0 0-14-4M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14 4M20 20v-4h-4"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  alert:'<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.01"/>', play:'<path d="M7 4l13 8-13 8z"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+  up:'<path d="M12 19V5M6 11l6-6 6 6"/>', down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+  bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/>',
+  eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  compare:'<path d="M8 3v18M16 3v18M3 8h5M16 16h5"/>', book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/>'
+};
+function icon(n){ const s=document.createElementNS(NS,"svg"); s.setAttribute("class","icon"); s.setAttribute("viewBox","0 0 24 24"); s.setAttribute("aria-hidden","true"); s.innerHTML=ICONS[n]||""; return s; }
+const fmtDate = iso => { try { return new Date(iso).toLocaleString("pt-BR",{dateStyle:"medium",timeStyle:"short"}); } catch(e){ return "Data indisponível"; } };
+const bandOf = p => p>=70 ? {label:"Em destaque nesta simulação",cls:"ok",key:"high"} : p>=45 ? {label:"Consistente, com pontos a desenvolver",cls:"warn",key:"mid"} : {label:"Em desenvolvimento",cls:"risk",key:"low"};
+const levelLabel = v => v<=2?"Baixa":v<=4?"Em construção":v<=6?"Moderada":v<=8?"Boa":"Alta";
+function announce(msg){ const a=$("#announcer"); a.textContent=""; setTimeout(()=>{ a.textContent=msg; },60); }
+function toast(msg,ms=5200){ const t=$("#toast"); t.textContent=msg; t.hidden=false; clearTimeout(toast._t); toast._t=setTimeout(()=>{ t.hidden=true; },ms); }
+function focusEl(el){ if(!el) return; if(!el.hasAttribute("tabindex") && !/^(A|BUTTON|INPUT|SELECT|TEXTAREA)$/.test(el.tagName)) el.setAttribute("tabindex","-1"); el.focus(); }
+function confirmDialog({title,text,confirmLabel="Confirmar",danger=false}){
+  return new Promise(resolve=>{
+    const dlg=$("#dlg");
+    if(typeof dlg.showModal!=="function"){ resolve(window.confirm(title+"\n\n"+text)); return; }
+    $("#dlg-title").textContent=title; $("#dlg-text").textContent=text;
+    const ok=$("#dlg-ok"); ok.textContent=confirmLabel; ok.className="btn "+(danger?"danger solid":"primary");
+    dlg.returnValue="cancel";
+    dlg.addEventListener("close",()=>resolve(dlg.returnValue==="ok"),{once:true});
+    dlg.showModal(); $("#dlg-cancel").focus();
+  });
+}
+
+/* =====================================================================
+   5. MOTOR DE RAMIFICAÇÃO NARRATIVA
+   O estado é sempre derivado da lista de decisões [{scene, option, hint}].
+   ===================================================================== */
+function matches(c,st){
+  if(!c) return true;
+  if(c.flag && !st.flags[c.flag]) return false;
+  if(c.notFlag && st.flags[c.notFlag]) return false;
+  if(c.flagAny && !c.flagAny.some(f=>st.flags[f])) return false;
+  if(c.chose && !st.chosen.includes(c.chose)) return false;
+  if(c.choseAny && !c.choseAny.some(o=>st.chosen.includes(o))) return false;
+  for(const k of ["trust","open","agree","prog","score"]){
+    const v = k==="score" ? st.score : st.vars[k];
+    if(c[k+"Min"]!==undefined && !(v>=c[k+"Min"])) return false;
+    if(c[k+"Max"]!==undefined && !(v<=c[k+"Max"])) return false;
+  }
+  return true;
+}
+const pickVariant = (scene,st) => scene.v.find(x=>matches(x.w,st)) || scene.v[scene.v.length-1];
+const pickText = (x,scene) => typeof x==="string" ? x : (x[scene.id] || Object.values(x)[0]);
+
+/* Efeito de cada alternativa nas variáveis narrativas, derivado das notas [esc, emp, com, dir] */
+function narrativeDeltas(s){
+  const [e,m,c,d]=s;
+  return {
+    trust: clamp(Math.round((e+m)/2)-1,-1,2),
+    open:  clamp(e+m-2,-1,2),
+    agree: clamp(d+(c>=2?1:0)-1,-1,2),
+    prog:  clamp(Math.round((c+d)/2)-1,-1,2)
+  };
+}
+
+function computeState(sc,decisions){
+  const st={sceneId:sc.start,vars:{...CFG.start},scores:[0,0,0,0],flags:{},chosen:[],trail:[],hints:0,finished:false};
+  decisions.forEach((d,i)=>{
+    if(st.sceneId==="END") throw new Error("Decisões além do encerramento");
+    const scene=sc.scenes[st.sceneId];
+    if(!scene||d.scene!==st.sceneId) throw new Error("Cena inconsistente");
+    sc.scenes[st.sceneId].id=st.sceneId;
+    const idx=scene.o.findIndex(o=>o.id===d.option);
+    if(idx<0) throw new Error("Alternativa inexistente");
+    const opt=scene.o[idx], variant=pickVariant(scene,st), before={...st.vars}, dl=narrativeDeltas(opt.s);
+    scene.id=st.sceneId;
+    opt.s.forEach((v,k)=>{ st.scores[k]+=v; });
+    VARS.forEach(v=>{ st.vars[v.k]=clamp(st.vars[v.k]+dl[v.k],0,CFG.max); });
+    opt.fl.forEach(f=>{ st.flags[f]=true; });
+    st.chosen.push(opt.id); if(d.hint) st.hints++;
+    st.trail.push({n:i+1,scene,option:opt,idx,variant,before,after:{...st.vars},d:dl,hint:!!d.hint});
+    st.sceneId=opt.next;
+  });
+  st.finished=st.sceneId==="END";
+  return st;
+}
+const _memo={};
+function maxFrom(sc,id,i){
+  if(id==="END") return 0;
+  const k=sc.id+":"+id+":"+i; if(k in _memo) return _memo[k];
+  return _memo[k]=Math.max(...sc.scenes[id].o.map(o=>o.s[i]+maxFrom(sc,o.next,i)));
+}
+function computeResult(sc,decisions){
+  const st=computeState(sc,decisions);
+  if(!st.finished) throw new Error("Simulação incompleta");
+  const pct=COMPS.map((c,i)=>clamp(Math.round(st.scores[i]/maxFrom(sc,sc.start,i)*100),0,100));
+  const overall=clamp(Math.round(pct.reduce((a,b)=>a+b,0)/pct.length),0,100);
+  st.score=overall;
+  const key = sc.rules.critical.some(c=>matches(c,st)) ? "critical" : matches(sc.rules.constructive,st) ? "constructive" : "partial";
+  return {st,pct,overall,key,ending:sc.endings[key],notes:sc.notes.filter(n=>matches(n.w,st)).map(n=>n.t)};
+}
+
+/* Verificação de integridade dos grafos (executada ao iniciar) */
+function validateScenarios(){
+  const errs=[];
+  Object.values(SCENARIOS).forEach(sc=>{
+    const seen=new Set();
+    (function walk(id,stack){
+      if(id==="END") return;
+      const s=sc.scenes[id]; if(!s){ errs.push(sc.id+": cena inexistente "+id); return; }
+      if(stack.includes(id)){ errs.push(sc.id+": ciclo em "+id); return; }
+      seen.add(id);
+      if(!s.o||s.o.length!==3) errs.push(sc.id+"/"+id+": precisa de 3 alternativas");
+      if(!s.v||!s.v.length||s.v[s.v.length-1].w) errs.push(sc.id+"/"+id+": falta variante padrão");
+      (s.o||[]).forEach(o=>{
+        if(!(o.s&&o.s.length===4&&o.s.every(x=>x>=0&&x<=3))) errs.push(o.id+": notas inválidas");
+        if(!(o.beh&&o.eff&&o.adj&&o.tip)) errs.push(o.id+": feedback incompleto");
+        if(typeof o.eff==="object"&&!o.eff[id]) errs.push(o.id+": falta consequência para "+id);
+        walk(o.next,stack.concat(id));
+      });
+    })(sc.start,[]);
+    Object.keys(sc.scenes).forEach(id=>{ if(!seen.has(id)) errs.push(sc.id+": cena inalcançável "+id); });
+    (function len(id,d){ if(id==="END"){ if(d<CFG.total) errs.push(sc.id+": rota com "+d+" decisões"); return; } sc.scenes[id]&&sc.scenes[id].o.forEach(o=>len(o.next,d+1)); })(sc.start,0);
+  });
+  return errs;
+}
+
+/* =====================================================================
+   6. ESTADO E PERSISTÊNCIA (localStorage versionado)
+   ===================================================================== */
+const app={store:null,screen:"dashboard",scenarioId:null,reportId:null,reportFresh:false,compare:[],selected:null,locked:false,typingTimer:null,storageWarned:false,notice:null};
+const emptyStore=()=>({version:1,current:null,history:[]});
+const str=(v,max=2000)=>typeof v==="string"?v.slice(0,max):"";
+function sanitizeStore(raw){
+  const out=emptyStore(); let dropped=0;
+  if(!raw||typeof raw!=="object"||raw.version!==1) return {store:out,dropped:1};
+  const okDec=arr=>Array.isArray(arr)&&arr.every(d=>d&&typeof d.scene==="string"&&typeof d.option==="string");
+  const cleanDec=arr=>arr.map(d=>({scene:d.scene,option:d.option,hint:!!d.hint}));
+  const c=raw.current;
+  if(c){
+    try{
+      const sc=SCENARIOS[c.scenarioId]; if(!sc||!okDec(c.decisions)) throw new Error("formato");
+      if(computeState(sc,c.decisions).finished) throw new Error("concluída");
+      out.current={scenarioId:c.scenarioId,startedAt:str(c.startedAt,40)||new Date().toISOString(),decisions:cleanDec(c.decisions),hintScene:typeof c.hintScene==="string"?c.hintScene:null,awaitingContinue:!!c.awaitingContinue&&c.decisions.length>0};
+    }catch(e){ dropped++; }
+  }
+  if(Array.isArray(raw.history)) raw.history.forEach(a=>{
+    try{
+      const sc=a&&SCENARIOS[a.scenarioId];
+      if(!sc||typeof a.id!=="string"||isNaN(new Date(a.date))||!okDec(a.decisions)) throw new Error("formato");
+      computeResult(sc,a.decisions);
+      const rf=Array.isArray(a.reflection)?a.reflection:[], pl=a.plan&&typeof a.plan==="object"?a.plan:{};
+      out.history.push({id:a.id,scenarioId:a.scenarioId,date:a.date,decisions:cleanDec(a.decisions),
+        reflection:[0,1,2].map(i=>str(rf[i])),
+        plan:{comp:COMPS.some(x=>x.k===pl.comp)?pl.comp:"",behavior:str(pl.behavior),situation:str(pl.situation),review:/^\d{4}-\d{2}-\d{2}$/.test(pl.review||"")?pl.review:""}});
+    }catch(e){ dropped++; }
+  });
+  return {store:out,dropped};
+}
+function loadStore(){
+  let raw=null;
+  try{ raw=localStorage.getItem(CFG.key); }catch(e){ app.storageWarned=true; return emptyStore(); }
+  if(!raw) return emptyStore();
+  let p; try{ p=JSON.parse(raw); }catch(e){ app.notice="Os dados salvos estavam corrompidos e foram reiniciados."; return emptyStore(); }
+  const {store,dropped}=sanitizeStore(p);
+  if(dropped) app.notice="Alguns registros salvos eram inválidos ou de outra versão e foram ignorados.";
+  return store;
+}
+function saveStore(){
+  try{ localStorage.setItem(CFG.key,JSON.stringify(app.store)); }
+  catch(e){ if(!app.storageWarned){ app.storageWarned=true; toast("Não foi possível salvar neste navegador. O progresso será mantido apenas enquanto esta página estiver aberta."); } }
+}
+const findAttempt = id => app.store.history.find(a=>a.id===id);
+
+/* =====================================================================
+   7. NAVEGAÇÃO
+   ===================================================================== */
+const TITLES={dashboard:"Início",library:"Biblioteca de simulações",briefing:"Briefing da conversa",sim:"Simulador de conversa",report:"Relatório da simulação",history:"Histórico de desenvolvimento",compare:"Comparação de tentativas"};
+const NAV_OF={dashboard:"dashboard",library:"library",briefing:"library",sim:"library",report:"history",history:"history",compare:"history"};
+function mount(name,...nodes){ const el=$("#screen-"+name); el.replaceChildren(); nodes.flat().forEach(n=>n&&el.append(n)); }
+function go(name,opts={}){
+  clearTimeout(app.typingTimer); app.typingTimer=null; app.selected=null; app.locked=false; app.screen=name;
+  $$(".screen").forEach(s=>{ s.hidden=s.id!=="screen-"+name; });
+  ({dashboard:viewDashboard,library:viewLibrary,briefing:viewBriefing,sim:()=>viewSim(opts.sim||{}),report:viewReport,history:viewHistory,compare:viewCompare})[name]();
+  ["dashboard","library","history"].forEach(n=>{ const b=$("#nav-"+n); if(NAV_OF[name]===n) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); });
+  if(opts.focus!==false){ window.scrollTo(0,0); if(name!=="sim") focusEl($("#screen-"+name+" h1")); announce(TITLES[name]); }
+}
+
+/* =====================================================================
+   8. COMPONENTES REUTILIZÁVEIS
+   ===================================================================== */
+const pageHead=(title,sub)=>h("div",{class:"page-head"},h("h1",{tabindex:-1,text:title}),sub&&h("p",{text:sub}));
+const diffEl=n=>h("span",{class:"diff",role:"img","aria-label":"Dificuldade: "+DIFF_LABEL[n]},[1,2,3].map(i=>h("i",{class:i<=n?"on":""})));
+function compList(withRubric){
+  return h("ul",{class:"list",style:"list-style:none;padding:0;gap:12px"},COMPS.map(c=>h("li",{style:"display:grid;grid-template-columns:36px 1fr;gap:12px"},
+    h("span",{class:"chip",style:"width:36px;height:36px;border-radius:10px;justify-content:center;padding:0"},icon(c.icon)),
+    h("div",null,h("b",{text:c.name}),h("span",{class:"muted",style:"display:block;font-size:.92rem",text:c.desc}),
+      withRubric&&h("details",{class:"acc",style:"margin-top:8px"},h("summary",{text:"Rubrica de comportamentos observáveis"}),
+        h("div",{class:"acc-body"},c.levels.map((t,i)=>h("p",null,h("b",{text:"Nível "+i+": "}),t))))))));
+}
+function scenarioCard(sc){
+  return h("article",{class:"card sc-card"},
+    h("div",{class:"row"},diffEl(sc.difficulty),h("span",{class:"chip plain",text:DIFF_LABEL[sc.difficulty]})),
+    h("h3",{text:sc.title}),h("p",{class:"muted",text:sc.summary}),
+    h("div",{class:"row"},sc.tags.map(t=>h("span",{class:"chip",text:t}))),
+    h("ul",{class:"facts"},h("li",null,icon("clock"),"Duração estimada: "+sc.minutes+" minutos"),h("li",null,icon("route"),CFG.total+" decisões e 3 desfechos possíveis")),
+    h("div",{class:"row"},h("button",{class:"btn primary",type:"button","data-action":"brief","data-id":sc.id},icon("play"),"Ver briefing")));
+}
+function attemptRow(a,opts={}){
+  const sc=SCENARIOS[a.scenarioId], r=computeResult(sc,a.decisions), o=OUTCOMES[r.key];
+  return h("div",{class:"attempt"},
+    h("div",{class:"score-badge","aria-label":"Pontuação indicativa "+r.overall+" de 100",text:String(r.overall)}),
+    h("div",null,
+      h("div",{class:"row"},h("b",{text:sc.title}),h("span",{class:"chip "+o.cls,text:o.label}),h("span",{class:"muted",style:"font-size:.9rem",text:fmtDate(a.date)})),
+      h("div",{class:"muted",style:"font-size:.88rem;margin-top:2px",text:"Pistas utilizadas: "+r.st.hints+" de "+CFG.total}),
+      h("div",{class:"mini-bars"},COMPS.map((c,i)=>h("div",null,h("small",null,h("span",{text:c.name}),h("span",{text:r.pct[i]+"%"})),h("div",{class:"bar",role:"img","aria-label":c.name+": "+r.pct[i]+" por cento"},h("span",{style:"width:"+r.pct[i]+"%"})))))),
+    h("div",{class:"row"},
+      h("button",{class:"btn small",type:"button","data-action":"view-report","data-id":a.id},icon("eye"),"Ver relatório"),
+      opts.select&&h("label",{class:"pick"},h("input",{type:"checkbox",name:"cmp","data-id":a.id,"data-sc":a.scenarioId,checked:app.compare.includes(a.id)}),"Comparar"),
+      opts.del&&h("button",{class:"btn small danger",type:"button","data-action":"delete-one","data-id":a.id,"aria-label":"Excluir tentativa de "+fmtDate(a.date)},icon("trash"),"Excluir")));
+}
+
+/* =====================================================================
+   9. TELAS: DASHBOARD, BIBLIOTECA, BRIEFING
+   ===================================================================== */
+function viewDashboard(){
+  const cur=app.store.current, hist=app.store.history;
+  const results=hist.map(a=>computeResult(SCENARIOS[a.scenarioId],a.decisions));
+  const avg=COMPS.map((c,i)=>results.length?Math.round(results.reduce((s,r)=>s+r.pct[i],0)/results.length):0);
+  const hints=results.reduce((s,r)=>s+r.st.hints,0);
+  const done=new Set(hist.map(a=>a.scenarioId)).size;
+  mount("dashboard",
+    pageHead("Olá! Bem-vindo ao Leadership Coach","Pratique conversas desafiadoras de liderança em um ambiente seguro. Cada decisão tem consequências, e cada simulação termina com feedback estruturado sobre as suas competências."),
+    app.notice&&h("div",{class:"notice",role:"status",style:"margin-bottom:20px"},icon("alert"),h("span",{text:app.notice})),
+    cur&&h("div",{class:"card row between",style:"margin-bottom:22px"},
+      h("div",null,h("b",{text:"Você tem uma conversa em andamento"}),h("p",{class:"muted",text:SCENARIOS[cur.scenarioId].title+": "+cur.decisions.length+" de "+CFG.total+" decisões feitas."})),
+      h("button",{class:"btn primary",type:"button","data-action":"resume"},icon("play"),"Continuar simulação")),
+    h("section",{class:"hero","aria-labelledby":"space-title"},h("h2",{id:"space-title",text:"Seu espaço de prática"}),
+      h("p",{text:"Grandes conversas exigem preparo. Pratique decisões, explore abordagens e desenvolva sua liderança."}),
+      h("div",{class:"row",style:"margin-top:8px"},h("button",{class:"btn primary",type:"button","data-action":"go","data-to":"library"},icon("play"),"Iniciar nova simulação"))),
+    h("h2",{class:"section-title",text:"Cenários disponíveis"}),
+    h("div",{class:"grid-3"},Object.values(SCENARIOS).map(scenarioCard)),
+    h("h2",{class:"section-title",text:"Resumo do seu desenvolvimento"}),
+    h("div",{class:"cols-2"},
+      h("section",{class:"card","aria-label":"Resumo em números"},
+        h("div",{class:"stats"},
+          h("div",{class:"stat"},h("b",{text:String(hist.length)}),h("span",{text:"simulações concluídas"})),
+          h("div",{class:"stat"},h("b",{text:done+" de 3"}),h("span",{text:"cenários praticados"})),
+          h("div",{class:"stat"},h("b",{text:String(hints)}),h("span",{text:"pistas utilizadas"}))),
+        h("p",{class:"muted",style:"margin-top:16px;font-size:.93rem",text:hist.length?"As médias ao lado são indicadores das suas simulações, não uma avaliação validada do profissional.":"Conclua uma simulação para ver o resumo das suas competências."})),
+      h("section",{class:"card","aria-label":"Média por competência"},
+        h("h3",{text:"Média por competência",style:"margin-bottom:14px"}),
+        hist.length?COMPS.map((c,i)=>h("div",{class:"comp-row",style:"margin-bottom:12px"},h("div",{class:"top"},h("span",{text:c.name}),h("b",{text:avg[i]+"%"})),h("div",{class:"bar",role:"img","aria-label":c.name+": "+avg[i]+" por cento"},h("span",{style:"width:"+avg[i]+"%"})))):h("div",{class:"empty"},h("p",{text:"Sem dados ainda."})))),
+    h("h2",{class:"section-title",text:"Simulações concluídas"}),
+    h("section",{class:"card"},hist.length?[hist.slice(0,3).map(a=>attemptRow(a)),hist.length>3&&h("div",{class:"row",style:"margin-top:8px"},h("button",{class:"btn small",type:"button","data-action":"go","data-to":"history"},"Ver histórico completo"))]
+      :h("div",{class:"empty"},h("p",{text:"Você ainda não concluiu nenhuma simulação. Suas tentativas aparecerão aqui."}),h("button",{class:"btn primary",type:"button","data-action":"go","data-to":"library"},"Escolher um cenário"))));
+}
+function viewLibrary(){
+  mount("library",pageHead("Biblioteca de simulações","Escolha um cenário. Todos têm cinco decisões, ramificações próprias e três desfechos possíveis."),
+    h("div",{class:"grid-3"},Object.values(SCENARIOS).map(scenarioCard)),
+    h("div",{class:"notice info",style:"margin-top:22px"},icon("info"),h("span",{text:"Os cenários usam a empresa fictícia "+COMPANY+" e personagens inventados. Não informe dados pessoais reais."})));
+}
+function viewBriefing(){
+  const sc=SCENARIOS[app.scenarioId]; if(!sc){ go("library"); return; }
+  const b=sc.brief;
+  mount("briefing",pageHead(sc.title,"Briefing da conversa. Leia com atenção antes de começar."),
+    h("div",{class:"grid-2"},
+      h("div",{class:"stack"},
+        h("article",{class:"card"},
+          h("h2",{text:"Contexto organizacional"}),h("p",{style:"margin:8px 0 18px;max-width:68ch",text:b.context}),
+          h("h3",{text:"Situação que motivou a conversa"}),h("p",{style:"margin:6px 0 18px;max-width:68ch",text:b.situation}),
+          h("h3",{text:"Seu objetivo como líder"}),h("p",{style:"margin:6px 0 18px;max-width:68ch",text:b.goal}),
+          h("h3",{text:"Orientações de participação"}),h("ul",{class:"list"},b.tips.map(t=>h("li",{text:t}))),
+          h("div",{class:"row",style:"margin-top:24px"},h("button",{class:"btn primary",type:"button","data-action":"begin"},icon("play"),"Iniciar conversa"),h("button",{class:"btn",type:"button","data-action":"go","data-to":"library"},"Voltar à biblioteca")))),
+      h("div",{class:"stack"},
+        h("section",{class:"card","aria-label":"Perfil dos personagens"},Object.values(sc.chars).map((c,i)=>h("div",{style:i?"margin-top:18px":""},
+          h("div",{class:"persona"},h("div",{class:"avatar lg "+c.tone,"aria-hidden":"true",text:c.ini}),h("div",null,h("b",{text:c.name}),h("small",{text:c.role+", "+COMPANY}))),
+          h("p",{class:"muted",style:"margin-top:8px;font-size:.95rem",text:c.profile})))),
+        h("section",{class:"card"},h("h2",{text:"Competências observadas",style:"margin-bottom:14px"}),compList(true)),
+        h("div",{class:"notice info"},icon("info"),h("span",{text:"As pontuações são indicadores do desempenho dentro da simulação. Não representam uma avaliação validada do profissional."})))));
+}
+
+/* =====================================================================
+   10. TELA: SIMULADOR
+   ===================================================================== */
+function personaEl(c){ return h("div",{class:"persona"},h("div",{class:"avatar "+c.tone,"aria-hidden":"true",text:c.ini}),h("div",null,h("b",{text:c.name}),h("small",{text:c.role}))); }
+function bubble(sc,who,text,isNew){
+  if(who==="me") return h("div",{class:"msg me"},h("div",{class:"avatar sm me","aria-hidden":"true",text:"VC"}),h("div",{class:"bubble"},h("div",{class:"who",text:"Você"}),h("p",{text})));
+  const c=sc.chars[who];
+  return h("div",{class:"msg other"+(isNew?" new":"")},h("div",{class:"avatar sm "+c.tone,"aria-hidden":"true",text:c.ini}),h("div",{class:"bubble"},h("div",{class:"who",text:c.name}),h("p",{text})));
+}
+function moodEl(m){
+  return h("div",{class:"mood","aria-label":"Estado da conversa: "+MOODS[m]+", nível "+m+" de 5"},
+    h("span",null,"Clima da conversa: ",h("b",{text:MOODS[m]})),h("span",{class:"meter","aria-hidden":"true"},[1,2,3,4,5].map(i=>h("i",{class:i<=m?"on":""}))));
+}
+function stateEl(vars){
+  return h("div",{class:"state"},VARS.map(v=>h("div",{class:"state-row"},h("div",{class:"top"},h("span",{text:v.name}),h("b",{text:levelLabel(vars[v.k])})),
+    h("span",{class:"meter","aria-hidden":"true"},[1,2,3,4,5].map(i=>h("i",{class:i<=Math.ceil(vars[v.k]/2)?"on":""}))))));
+}
+function choiceForm(sc,st,cur){
+  const scene=sc.scenes[st.sceneId], n=st.trail.length+1, hintOn=cur.hintScene===st.sceneId;
+  return h("form",{id:"choice-form",novalidate:true},h("fieldset",null,
+    h("legend",{id:"decision-legend",tabindex:-1},h("small",{text:"Decisão "+n+" de "+CFG.total+": "+sc.steps[scene.step-1]}),"Como você responde?"),
+    h("p",{class:"prompt",text:scene.prompt}),
+    hintOn&&h("div",{class:"hint",role:"note"},h("b",{text:"Orientação: "}),scene.hint),
+    h("div",{class:"options"},scene.o.map(o=>h("label",{class:"option"},
+      h("input",{type:"radio",name:"opt",value:o.id,checked:app.selected===o.id}),
+      h("span",{class:"option-body"},h("span",{class:"dot","aria-hidden":"true"},(()=>{const s=document.createElementNS(NS,"svg");s.setAttribute("viewBox","0 0 24 24");s.innerHTML='<path d="M5 12l5 5 9-10"/>';return s;})()),h("span",{text:o.text}))))),
+    h("div",{class:"actions"},
+      h("button",{type:"submit",class:"btn primary",id:"btn-confirm",disabled:!app.selected},icon("check"),"Confirmar decisão"),
+      h("button",{type:"button",class:"btn",id:"btn-hint","data-action":"hint",disabled:hintOn,"aria-expanded":hintOn?"true":"false"},icon("bulb"),hintOn?"Orientação exibida":"Preciso de uma orientação"),
+      h("span",{class:"muted",style:"font-size:.9rem",text:"Usar a orientação é uma forma de apoio. Ela fica registrada no relatório, sem penalização."}))));
+}
+function feedbackEl(sc,st){
+  const t=st.trail[st.trail.length-1], o=t.option;
+  const main=o.s.map((v,i)=>({v,i})).filter(x=>x.v>=2); if(!main.length){ const b=o.s.reduce((a,v,i)=>v>o.s[a]?i:a,0); main.push({v:o.s[b],i:b}); }
+  const ch=VARS.map(v=>({v,d:t.after[v.k]-t.before[v.k]})).filter(x=>x.d!==0);
+  return h("div",{class:"fb","aria-live":"polite"},
+    h("div",{class:"fb-head"},h("h2",{id:"fb-title",tabindex:-1,text:"Feedback da decisão "+t.n}),h("span",{class:"chip plain",text:t.hint?"Orientação utilizada":"Sem orientação"})),
+    h("div",{class:"fb-grid"},
+      h("div",{class:"fb-block"},h("h4",{text:"Comportamento demonstrado"}),h("p",{text:o.beh})),
+      h("div",{class:"fb-block"},h("h4",{text:"Efeito provável sobre a conversa"}),h("p",{text:pickText(o.eff,t.scene)})),
+      h("div",{class:"fb-block"},h("h4",{text:"Competência envolvida"}),main.map(x=>h("p",{style:"margin-bottom:4px"},h("b",{text:COMPS[x.i].name+": "}),COMPS[x.i].levels[x.v]))),
+      h("div",{class:"fb-block"},h("h4",{text:"Possível ajuste ou alternativa"}),h("p",{text:o.adj})),
+      h("div",{class:"fb-block wide"},h("h4",{text:"Orientação prática para uma conversa real"}),h("p",{text:o.tip})),
+      h("div",{class:"fb-block wide"},h("h4",{text:"Variáveis narrativas da conversa"}),
+        h("div",{class:"deltas"},ch.length?ch.map(x=>h("span",{class:"chip "+(x.d>0?"ok":"warn")},icon(x.d>0?"up":"down"),x.v.name+(x.d>0?" aumentou":" diminuiu"))):h("span",{class:"chip plain",text:"Sem alteração relevante"})),
+        h("p",{class:"muted",style:"font-size:.88rem;margin-top:8px",text:"São estados da simulação, não diagnósticos sobre pessoas."}))),
+    h("div",{class:"actions"},h("button",{class:"btn primary",type:"button",id:"btn-continue","data-action":"continue"},st.finished?"Ver relatório final":"Continuar",icon("arrow"))));
+}
+function viewSim(opts={}){
+  const cur=app.store.current; if(!cur){ go("dashboard"); return; }
+  const sc=SCENARIOS[cur.scenarioId]; let st;
+  try{ st=computeState(sc,cur.decisions); }catch(e){ app.store.current=null; saveStore(); toast("Não foi possível retomar a simulação salva. Ela foi reiniciada."); go("dashboard"); return; }
+  const wantTyping=!!opts.typing&&!cur.awaitingContinue&&!st.finished&&!reducedMotion();
+  const items=[]; // {who,text,isNew}
+  const lastLines=[]; let mood=2;
+  st.trail.forEach(t=>{ t.variant.l.forEach(([w,x])=>items.push({who:w,text:x})); mood=t.variant.m; items.push({who:"me",text:t.option.text}); });
+  let curVariant=null;
+  if(!cur.awaitingContinue&&!st.finished){
+    sc.scenes[st.sceneId].id=st.sceneId; curVariant=pickVariant(sc.scenes[st.sceneId],st);
+    if(!wantTyping){ curVariant.l.forEach(([w,x])=>items.push({who:w,text:x,isNew:!!opts.focus})); mood=curVariant.m; }
+  }
+  if(cur.awaitingContinue&&st.trail.length) mood=st.trail[st.trail.length-1].variant.m;
+  const done=st.trail.length, wide=window.matchMedia("(min-width:901px)").matches;
+  const firstWho=Object.keys(sc.chars)[0];
+  const area = cur.awaitingContinue ? feedbackEl(sc,st) : wantTyping ? h("p",{class:"muted",text:"A outra pessoa está digitando…"}) : choiceForm(sc,st,cur);
+  const log=h("div",{class:"chat-log",id:"chat-log",tabindex:0,role:"region","aria-label":"Histórico da conversa"},
+    items.map(it=>bubble(sc,it.who,it.text,it.isNew)),
+    wantTyping&&h("div",{class:"msg other"},h("div",{class:"avatar sm "+sc.chars[firstWho].tone,"aria-hidden":"true",text:sc.chars[firstWho].ini}),h("div",{class:"bubble"},h("span",{class:"typing","aria-hidden":"true"},h("i"),h("i"),h("i")))));
+  mount("sim",
+    h("h1",{class:"sr-only",tabindex:-1,text:"Simulação: "+sc.title}),
+    h("div",{class:"sim"},
+      h("aside",{class:"sim-side card","aria-label":"Informações do cenário"},
+        Object.values(sc.chars).map(personaEl),
+        h("div",null,h("div",{class:"row between",style:"margin-bottom:6px"},h("b",{style:"font-size:.95rem",text:"Progresso"}),h("span",{class:"muted",style:"font-size:.9rem",text:done+" de "+CFG.total+" decisões"})),
+          h("div",{class:"progress",role:"progressbar","aria-label":"Progresso da simulação","aria-valuemin":0,"aria-valuemax":CFG.total,"aria-valuenow":done},h("span",{style:"width:"+Math.round(done/CFG.total*100)+"%"}))),
+        h("div",null,h("b",{style:"font-size:.95rem",text:"Estado da conversa"}),h("div",{style:"margin-top:8px"},stateEl(st.vars))),
+        h("details",{class:"acc",open:wide},h("summary",{text:"Contexto e objetivo"}),h("div",{class:"acc-body"},h("p",{text:sc.brief.situation}),h("p",null,h("b",{text:"Objetivo: "}),sc.brief.goal))),
+        h("details",{class:"acc",open:wide},h("summary",{text:"Competências avaliadas"}),h("div",{class:"acc-body"},compList(false),h("p",{text:"Os resultados por competência aparecem no relatório final."}))),
+        h("div",{class:"row"},h("button",{class:"btn small danger",type:"button","data-action":"restart"},icon("refresh"),"Reiniciar"),h("button",{class:"btn small",type:"button","data-action":"go","data-to":"dashboard"},"Sair e continuar depois"))),
+      h("div",{class:"sim-main"},
+        h("section",{class:"card","aria-label":"Conversa"},
+          h("div",{class:"chat-head"},h("div",{class:"row"},Object.values(sc.chars).map(c=>h("div",{class:"avatar "+c.tone,"aria-hidden":"true",text:c.ini})),h("div",null,h("b",{text:Object.values(sc.chars).map(c=>c.name).join(" e ")}),h("br"),h("span",{class:"muted",style:"font-size:.88rem",text:sc.title+", "+COMPANY}))),moodEl(mood)),log),
+        h("section",{class:"card decision",id:"decision-area","aria-label":"Decisão atual"},area))));
+  const l=$("#chat-log"); l.scrollTop=l.scrollHeight;
+  if(wantTyping){ app.typingTimer=setTimeout(()=>viewSim({focus:"decision",announceClient:true}),1000); return; }
+  if(opts.announceClient&&curVariant) announce(curVariant.l.map(([w,x])=>sc.chars[w].name+": "+x).join(" "));
+  if(opts.focus==="feedback") focusEl($("#fb-title"));
+  else if(opts.focus==="decision"){ const g=$("#decision-legend"); if(g) g.focus({preventScroll:true}); window.scrollTo({top:$("#decision-area").offsetTop-100,behavior:reducedMotion()?"auto":"smooth"}); }
+}
+function startTyping(){ viewSim({typing:true}); }
+function confirmChoice(){
+  if(app.locked||!app.selected) return;
+  const cur=app.store.current, sc=SCENARIOS[cur.scenarioId]; let st; try{ st=computeState(sc,cur.decisions); }catch(e){ return; }
+  if(!sc.scenes[st.sceneId].o.some(o=>o.id===app.selected)) return;
+  app.locked=true;
+  cur.decisions.push({scene:st.sceneId,option:app.selected,hint:cur.hintScene===st.sceneId});
+  cur.hintScene=null; cur.awaitingContinue=true; saveStore(); app.selected=null;
+  viewSim({focus:"feedback"}); app.locked=false;
+}
+function continueSim(){
+  if(app.locked) return; app.locked=true;
+  const cur=app.store.current, sc=SCENARIOS[cur.scenarioId], st=computeState(sc,cur.decisions);
+  cur.awaitingContinue=false;
+  if(st.finished){ finishAttempt(); app.locked=false; return; }
+  saveStore(); startTyping(); app.locked=false;
+}
+function finishAttempt(){
+  const cur=app.store.current;
+  const a={id:"t"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),scenarioId:cur.scenarioId,date:new Date().toISOString(),decisions:cur.decisions.slice(),reflection:["","",""],plan:{comp:"",behavior:"",situation:"",review:""}};
+  app.store.history.unshift(a); app.store.current=null; saveStore();
+  app.reportId=a.id; app.reportFresh=true; go("report");
+}
+function useHint(){
+  const cur=app.store.current; if(!cur) return;
+  const st=computeState(SCENARIOS[cur.scenarioId],cur.decisions);
+  cur.hintScene=st.sceneId; saveStore(); viewSim({focus:"decision"});
+  announce("Orientação: "+SCENARIOS[cur.scenarioId].scenes[st.sceneId].hint);
+}
+
+/* =====================================================================
+   11. TELA: RELATÓRIO FINAL
+   ===================================================================== */
+function radarSVG(pct){
+  const cx=150,cy=135,R=82, ang=[-90,0,90,180].map(a=>a*Math.PI/180);
+  const pt=(i,f)=>[(cx+Math.cos(ang[i])*R*f).toFixed(1),(cy+Math.sin(ang[i])*R*f).toFixed(1)];
+  const ring=f=>COMPS.map((_,i)=>pt(i,f).join(",")).join(" ");
+  const data=pct.map((p,i)=>pt(i,p/100).join(",")).join(" ");
+  const lab=[[150,20,"middle"],[262,139,"end"],[150,262,"middle"],[38,139,"start"]];
+  const s=document.createElementNS(NS,"svg"); s.setAttribute("class","radar"); s.setAttribute("viewBox","0 0 300 276"); s.setAttribute("aria-hidden","true");
+  s.innerHTML=[0.25,0.5,0.75,1].map(f=>`<polygon points="${ring(f)}" fill="none" stroke="#DCE3EB"/>`).join("")
+    +COMPS.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(i,1)[0]}" y2="${pt(i,1)[1]}" stroke="#DCE3EB"/>`).join("")
+    +`<polygon points="${data}" fill="rgba(35,107,131,.22)" stroke="#236B83" stroke-width="2.5" stroke-linejoin="round"/>`
+    +pct.map((p,i)=>`<circle cx="${pt(i,p/100)[0]}" cy="${pt(i,p/100)[1]}" r="4.5" fill="#236B83"/>`).join("")
+    +COMPS.map((c,i)=>`<text x="${lab[i][0]}" y="${lab[i][1]}" text-anchor="${lab[i][2]}" font-size="12" fill="#17273B">${c.name.split(" ")[0]}</text>`).join("");
+  return s;
+}
+function printBlock(a){
+  const pl=a.plan, comp=COMPS.find(c=>c.k===pl.comp);
+  return h("div",{class:"print-only",id:"print-user"},
+    h("h3",{text:"Reflexões registradas"}),
+    REFLECTION_QS.map((q,i)=>h("p",{style:"margin-top:8px"},h("b",{text:(i+1)+". "+q+" "}),a.reflection[i]||"(não preenchido)")),
+    h("h3",{style:"margin-top:16px",text:"Plano de ação"}),
+    h("p",null,h("b",{text:"Competência a desenvolver: "}),comp?comp.name:"(não preenchido)"),
+    h("p",null,h("b",{text:"Comportamento a praticar: "}),pl.behavior||"(não preenchido)"),
+    h("p",null,h("b",{text:"Situação de aplicação: "}),pl.situation||"(não preenchido)"),
+    h("p",null,h("b",{text:"Data prevista de revisão: "}),pl.review?new Date(pl.review+"T12:00:00").toLocaleDateString("pt-BR"):"(não preenchido)"));
+}
+function viewReport(){
+  const a=findAttempt(app.reportId), sc=a&&SCENARIOS[a.scenarioId]; let r=null;
+  try{ r=computeResult(sc,a.decisions); }catch(e){ r=null; }
+  if(!r){ mount("report",pageHead("Relatório indisponível","Não encontramos os dados desta tentativa."),h("button",{class:"btn primary",type:"button","data-action":"go","data-to":"history"},"Ir para o histórico")); return; }
+  const trail=r.st.trail, o=OUTCOMES[r.key], ring=r.key==="constructive"?"var(--sage)":r.key==="critical"?"var(--red)":"var(--amber)";
+  const strengths=trail.filter(t=>Math.max(...t.option.s)>=3).slice(0,4).map(t=>"Decisão "+t.n+": "+t.option.beh);
+  const gaps=trail.filter(t=>t.option.s.reduce((x,y)=>x+y,0)<=4||t.d.trust<0).slice(0,4).map(t=>"Decisão "+t.n+": "+t.option.adj);
+  const low=r.pct.indexOf(Math.min(...r.pct));
+  if(!strengths.length) strengths.push("Nenhuma decisão se destacou de forma consistente. Use as recomendações como ponto de partida.");
+  if(!gaps.length) gaps.push("A competência com menor indicador foi "+COMPS[low].name.toLowerCase()+" ("+r.pct[low]+"%). Experimente caminhos alternativos para comparar consequências.");
+  const hintsN=r.st.hints;
+  mount("report",
+    pageHead(app.reportFresh?"Simulação concluída":"Relatório da tentativa",app.reportFresh?"Você concluiu a conversa. Veja como as suas decisões moldaram o desfecho.":"Tentativa realizada em "+fmtDate(a.date)+"."),
+    h("div",{class:"stack"},
+      h("section",{class:"card","aria-labelledby":"res-t"},
+        h("div",{class:"hero-rep"},
+          h("div",{class:"score-ring",style:"--p:"+r.overall+";--ring:"+ring,role:"img","aria-label":"Pontuação indicativa: "+r.overall+" de 100"},h("div",null,h("span",null,h("b",{text:String(r.overall)}),h("small",{text:"de 100"})))),
+          h("div",null,h("div",{class:"row"},h("span",{class:"chip "+o.cls},icon(o.icon),o.label),h("span",{class:"muted",style:"font-size:.92rem",text:fmtDate(a.date)})),
+            h("h2",{id:"res-t",style:"margin:10px 0 6px",text:sc.title}),
+            h("p",{style:"max-width:68ch",text:r.ending.narr}),
+            h("div",{class:"quote"},r.ending.l.map(([w,x])=>h("p",{text:sc.chars[w].name+": “"+x+"”"}))))),
+        r.notes.length&&h("div",{style:"margin-top:20px"},h("h3",{text:"O que, na sua trajetória, pesou no desfecho"}),h("ul",{class:"list"},r.notes.map(n=>h("li",{text:n})))),
+        h("div",{class:"row",style:"margin-top:16px"},
+          h("span",{class:"chip plain",text:"Pistas utilizadas: "+hintsN+" de "+CFG.total}),
+          VARS.map(v=>h("span",{class:"chip plain",text:v.name+": "+levelLabel(r.st.vars[v.k])}))),
+        h("div",{class:"notice info",style:"margin-top:18px"},icon("info"),h("span",{text:"A pontuação indica o desempenho dentro desta simulação. Ela depende do cenário e das alternativas oferecidas, e não é uma avaliação validada do profissional."}))),
+      h("section",{class:"card","aria-labelledby":"map-t"},h("h2",{id:"map-t",style:"margin-bottom:18px",text:"Mapa de competências"}),
+        h("div",{class:"comp-split"},
+          h("div",null,COMPS.map((c,i)=>{ const b=bandOf(r.pct[i]); return h("div",{class:"comp-row"},
+            h("div",{class:"top"},h("b",{text:c.name}),h("span",null,h("b",{text:r.pct[i]+"% "}),h("span",{class:"chip "+b.cls,text:b.label}))),
+            h("div",{class:"bar "+b.cls,role:"img","aria-label":c.name+": "+r.pct[i]+" por cento"},h("span",{style:"width:"+r.pct[i]+"%"})),
+            h("p",{class:"muted",style:"font-size:.92rem"},h("b",{text:"Decisões que influenciaram: "}),trail.map(t=>"D"+t.n+" ("+t.option.s[i]+"/3)").join(", ")+"."),
+            h("p",{style:"font-size:.95rem",text:c.recs[b.key]})); })),
+          radarSVG(r.pct))),
+      h("div",{class:"cols-2"},
+        h("section",{class:"card","aria-labelledby":"str-t"},h("h2",{id:"str-t",text:"Pontos fortes"}),h("ul",{class:"list"},strengths.map(s=>h("li",{text:s})))),
+        h("section",{class:"card","aria-labelledby":"gap-t"},h("h2",{id:"gap-t",text:"Oportunidades de desenvolvimento"}),h("ul",{class:"list"},gaps.map(s=>h("li",{text:s}))))),
+      h("section",{class:"card","aria-labelledby":"rev-t"},h("h2",{id:"rev-t",style:"margin-bottom:4px",text:"Revisão das decisões"}),
+        trail.map((t,i)=>{
+          const react=i<trail.length-1?trail[i+1].variant.l:r.ending.l;
+          return h("article",{class:"step","aria-label":"Decisão "+t.n},
+            h("div",{class:"step-head"},h("h3",{text:"Decisão "+t.n+": "+sc.steps[t.scene.step-1]}),h("span",{class:"chip plain",text:t.hint?"Orientação utilizada":"Sem orientação"})),
+            h("div",{class:"quoteblock"},h("b",{text:"Situação apresentada"}),t.variant.l.map(([w,x])=>h("p",{text:sc.chars[w].name+": “"+x+"”"}))),
+            h("div",{class:"quoteblock",style:"background:#E8EEF4"},h("b",{text:"Sua resposta: "+t.option.label}),h("p",{text:t.option.text})),
+            h("div",{class:"quoteblock"},h("b",{text:i<trail.length-1?"Reação do colaborador":"Reação final"}),react.map(([w,x])=>h("p",{text:sc.chars[w].name+": “"+x+"”"}))),
+            h("p",null,h("b",{text:"Feedback: "}),t.option.beh+" "+pickText(t.option.eff,t.scene)),
+            h("div",{class:"row"},t.option.s.map((v,k)=>h("span",{class:"chip "+(v>=2?"":"plain"),text:COMPS[k].name+": nível "+v+"/3"}))));
+        }),
+        h("details",{class:"acc",style:"margin-top:8px"},h("summary",{text:"Como a pontuação é calculada"}),h("div",{class:"acc-body"},
+          h("p",{text:"Cada alternativa tem uma nota de 0 a 3 em cada competência, conforme as rubricas de comportamentos observáveis. As notas são somadas nas cinco decisões e normalizadas de 0 a 100 em relação ao máximo possível naquela competência no cenário. A pontuação geral é a média das quatro."}),
+          h("p",{text:"As variáveis narrativas (confiança, abertura, qualidade dos acordos e evolução) são derivadas das mesmas notas e, junto com a pontuação, determinam o desfecho. O uso de pistas não altera a pontuação."})))),
+      h("section",{class:"card","aria-labelledby":"ref-t"},h("h2",{id:"ref-t",style:"margin-bottom:14px",text:"Reflexão final"}),
+        h("div",{class:"no-print"},
+          REFLECTION_QS.map((q,i)=>h("div",{class:"field"},h("label",{for:"refl-"+i,text:(i+1)+". "+q}),h("textarea",{id:"refl-"+i,maxlength:"2000",value:a.reflection[i],"data-save":"reflection"}))),
+          h("div",{class:"row"},h("button",{class:"btn primary",type:"button","data-action":"save-reflect"},icon("check"),"Salvar reflexões"),h("span",{class:"muted",id:"refl-status",role:"status",style:"font-size:.92rem"}))),
+        h("p",{class:"muted no-print",style:"margin-top:10px;font-size:.9rem",text:"Suas reflexões ficam salvas apenas neste navegador. Evite incluir dados pessoais reais."})),
+      h("section",{class:"card","aria-labelledby":"plan-t"},h("h2",{id:"plan-t",style:"margin-bottom:14px",text:"Plano de ação"}),
+        h("div",{class:"no-print"},
+          h("div",{class:"field"},h("label",{for:"plan-comp",text:"Competência que deseja desenvolver"}),
+            h("select",{id:"plan-comp"},h("option",{value:"",text:"Selecione"}),COMPS.map(c=>h("option",{value:c.k,selected:a.plan.comp===c.k,text:c.name})))),
+          h("div",{class:"field"},h("label",{for:"plan-beh",text:"Comportamento específico que irá praticar"}),h("textarea",{id:"plan-beh",maxlength:"2000",value:a.plan.behavior})),
+          h("div",{class:"field"},h("label",{for:"plan-sit",text:"Situação profissional em que pretende aplicá-lo"}),h("textarea",{id:"plan-sit",maxlength:"2000",value:a.plan.situation})),
+          h("div",{class:"field",style:"max-width:260px"},h("label",{for:"plan-date",text:"Data prevista para revisão"}),h("input",{id:"plan-date",type:"date",value:a.plan.review})),
+          h("div",{class:"row"},h("button",{class:"btn primary",type:"button","data-action":"save-plan"},icon("check"),"Salvar plano"),h("span",{class:"muted",id:"plan-status",role:"status",style:"font-size:.92rem"}))),
+        printBlock(a)),
+      h("div",{class:"report-actions"},
+        h("button",{class:"btn primary",type:"button","data-action":"retry","data-id":sc.id},icon("refresh"),"Praticar novamente"),
+        h("button",{class:"btn",type:"button","data-action":"go","data-to":"dashboard"},"Voltar ao dashboard"),
+        h("button",{class:"btn",type:"button","data-action":"print"},icon("print"),"Imprimir relatório"))));
+}
+function saveReflection(){
+  const a=findAttempt(app.reportId); if(!a) return;
+  a.reflection=[0,1,2].map(i=>$("#refl-"+i).value.slice(0,2000)); saveStore();
+  $("#refl-status").textContent="Reflexões salvas."; announce("Reflexões salvas."); refreshPrint(a);
+}
+function savePlan(){
+  const a=findAttempt(app.reportId); if(!a) return;
+  const comp=$("#plan-comp").value, d=$("#plan-date").value;
+  a.plan={comp:COMPS.some(c=>c.k===comp)?comp:"",behavior:$("#plan-beh").value.slice(0,2000),situation:$("#plan-sit").value.slice(0,2000),review:/^\d{4}-\d{2}-\d{2}$/.test(d)?d:""};
+  saveStore(); $("#plan-status").textContent="Plano salvo."; announce("Plano de ação salvo."); refreshPrint(a);
+}
+function refreshPrint(a){ const old=$("#print-user"); if(old) old.replaceWith(printBlock(a)); }
+
+/* =====================================================================
+   12. TELAS: HISTÓRICO E COMPARAÇÃO
+   ===================================================================== */
+function viewHistory(){
+  const hist=app.store.history; app.compare=app.compare.filter(id=>hist.some(a=>a.id===id));
+  mount("history",pageHead("Histórico de desenvolvimento","Reveja relatórios anteriores e compare duas tentativas do mesmo cenário. Os dados ficam salvos apenas neste navegador."),
+    h("section",{class:"card","aria-label":"Lista de tentativas"},
+      hist.length?[
+        h("div",{class:"row between",style:"margin-bottom:6px"},
+          h("div",{class:"row"},h("button",{class:"btn small",type:"button",id:"btn-compare","data-action":"compare",disabled:true},icon("compare"),"Comparar tentativas"),h("span",{class:"muted",id:"cmp-hint",role:"status",style:"font-size:.9rem",text:"Selecione duas tentativas do mesmo cenário."})),
+          h("button",{class:"btn small danger",type:"button","data-action":"delete-all"},icon("trash"),"Excluir todo o histórico")),
+        hist.map(a=>attemptRow(a,{select:true,del:true}))]
+      :h("div",{class:"empty"},h("p",{text:"Nenhuma simulação concluída ainda. Ao finalizar uma conversa, o resultado aparecerá aqui."}),h("button",{class:"btn primary",type:"button","data-action":"go","data-to":"library"},icon("play"),"Escolher um cenário"))));
+  updateCompareUI();
+}
+function updateCompareUI(){
+  const b=$("#btn-compare"); if(!b) return;
+  const sel=app.compare.map(findAttempt).filter(Boolean), same=sel.length===2&&sel[0].scenarioId===sel[1].scenarioId;
+  b.disabled=!same;
+  $("#cmp-hint").textContent = sel.length<2 ? "Selecione duas tentativas do mesmo cenário." : same ? "Pronto para comparar." : "As duas tentativas precisam ser do mesmo cenário.";
+}
+function viewCompare(){
+  const sel=app.compare.map(findAttempt).filter(Boolean).sort((x,y)=>new Date(x.date)-new Date(y.date));
+  if(sel.length!==2||sel[0].scenarioId!==sel[1].scenarioId){ go("history"); return; }
+  const sc=SCENARIOS[sel[0].scenarioId], [A,B]=sel.map(a=>computeResult(sc,a.decisions));
+  const diff=(x,y)=>{ const d=y-x; return d===0?"sem variação":(d>0?"+":"−")+Math.abs(d)+" pontos percentuais"; };
+  const row=(label,a,b,extra)=>h("tr",null,h("th",{scope:"row",text:label}),h("td",null,a),h("td",null,b),h("td",{text:extra||""}));
+  mount("compare",pageHead("Comparação: "+sc.title,"Veja o que mudou entre as duas tentativas. Uma variação numérica isolada não comprova desenvolvimento profissional: use-a como ponto de partida para refletir."),
+    h("section",{class:"card"},h("div",{class:"cmp-wrap"},h("table",{class:"cmp"},
+      h("caption",{class:"sr-only",text:"Comparação entre tentativas do cenário "+sc.title}),
+      h("thead",null,h("tr",null,h("th",{scope:"col",text:"Indicador"}),h("th",{scope:"col",text:"Tentativa anterior"}),h("th",{scope:"col",text:"Tentativa mais recente"}),h("th",{scope:"col",text:"Variação"}))),
+      h("tbody",null,
+        row("Data",fmtDate(sel[0].date),fmtDate(sel[1].date)),
+        row("Pontuação indicativa",A.overall+" de 100",B.overall+" de 100",diff(A.overall,B.overall)),
+        row("Desfecho",OUTCOMES[A.key].label,OUTCOMES[B.key].label,A.key===B.key?"mesmo desfecho":"desfecho diferente"),
+        row("Pistas utilizadas",String(A.st.hints),String(B.st.hints),A.st.hints===B.st.hints?"sem variação":(B.st.hints>A.st.hints?"mais":"menos")+" pistas"),
+        COMPS.map((c,i)=>row(c.name,A.pct[i]+"%",B.pct[i]+"%",diff(A.pct[i],B.pct[i]))),
+        VARS.map(v=>row(v.name+" (final)",levelLabel(A.st.vars[v.k]),levelLabel(B.st.vars[v.k]),A.st.vars[v.k]===B.st.vars[v.k]?"sem variação":(B.st.vars[v.k]>A.st.vars[v.k]?"maior":"menor"))),
+        A.st.trail.map((t,i)=>{ const u=B.st.trail[i]; return row("Decisão "+t.n,t.option.label,u.option.label,t.option.id===u.option.id?"mesma escolha":"escolha diferente"); }))))),
+    h("div",{class:"report-actions",style:"margin-top:20px"},
+      h("button",{class:"btn primary",type:"button","data-action":"view-report","data-id":sel[1].id},icon("eye"),"Ver relatório mais recente"),
+      h("button",{class:"btn",type:"button","data-action":"go","data-to":"history"},"Voltar ao histórico")));
+}
+
+/* =====================================================================
+   13. EVENTOS E INICIALIZAÇÃO
+   ===================================================================== */
+async function restartSim(){
+  const ok=await confirmDialog({title:"Reiniciar a simulação?",text:"O progresso desta conversa será descartado e ela recomeça do início.",confirmLabel:"Reiniciar",danger:true});
+  if(!ok) return;
+  const cur=app.store.current; app.store.current={scenarioId:cur.scenarioId,startedAt:new Date().toISOString(),decisions:[],hintScene:null,awaitingContinue:false};
+  saveStore(); app.selected=null; startTyping(); announce("Simulação reiniciada.");
+}
+document.addEventListener("click",async e=>{
+  const btn=e.target.closest("[data-action]"); if(!btn) return;
+  const act=btn.dataset.action;
+  switch(act){
+    case "go": go(btn.dataset.to); break;
+    case "brief": app.scenarioId=btn.dataset.id; go("briefing"); break;
+    case "retry": app.scenarioId=btn.dataset.id; go("briefing"); break;
+    case "begin":{
+      if(app.store.current&&app.store.current.decisions.length){
+        const ok=await confirmDialog({title:"Substituir a simulação em andamento?",text:"Existe uma conversa não concluída. Iniciar uma nova descarta esse progresso.",confirmLabel:"Iniciar nova",danger:true});
+        if(!ok) break;
+      }
+      app.store.current={scenarioId:app.scenarioId,startedAt:new Date().toISOString(),decisions:[],hintScene:null,awaitingContinue:false};
+      saveStore(); go("sim",{focus:false,sim:{typing:true}}); window.scrollTo(0,0); announce("Conversa iniciada."); break;}
+    case "resume": go("sim",{sim:{focus:"decision"}}); break;
+    case "hint": useHint(); break;
+    case "continue": continueSim(); break;
+    case "restart": restartSim(); break;
+    case "view-report": app.reportId=btn.dataset.id; app.reportFresh=false; go("report"); break;
+    case "save-reflect": saveReflection(); break;
+    case "save-plan": savePlan(); break;
+    case "print": window.print(); break;
+    case "compare": go("compare"); break;
+    case "delete-one":{
+      const ok=await confirmDialog({title:"Excluir esta tentativa?",text:"O relatório, as reflexões e o plano desta tentativa serão removidos deste navegador.",confirmLabel:"Excluir",danger:true});
+      if(ok){ app.store.history=app.store.history.filter(a=>a.id!==btn.dataset.id); saveStore(); viewHistory(); toast("Tentativa excluída."); announce("Tentativa excluída."); focusEl($("#screen-history h1")); }
+      break;}
+    case "delete-all":{
+      const ok=await confirmDialog({title:"Excluir todo o histórico?",text:"Todas as tentativas, reflexões e planos serão removidos deste navegador. Uma simulação em andamento não é afetada.",confirmLabel:"Excluir tudo",danger:true});
+      if(ok){ app.store.history=[]; app.compare=[]; saveStore(); viewHistory(); toast("Histórico excluído."); announce("Histórico excluído."); focusEl($("#screen-history h1")); }
+      break;}
+  }
+});
+document.addEventListener("change",e=>{
+  const t=e.target;
+  if(t.name==="opt"){ app.selected=t.value; const b=$("#btn-confirm"); if(b) b.disabled=false; }
+  else if(t.name==="cmp"){
+    const id=t.dataset.id;
+    if(t.checked){ app.compare.push(id); if(app.compare.length>2){ const out=app.compare.shift(); const cb=$$("input[name=cmp]").find(x=>x.dataset.id===out); if(cb) cb.checked=false; } }
+    else app.compare=app.compare.filter(x=>x!==id);
+    updateCompareUI();
+  }
+  else if(t.dataset&&t.dataset.save==="reflection"){ saveReflection(); }
+});
+document.addEventListener("submit",e=>{ if(e.target.id==="choice-form"){ e.preventDefault(); confirmChoice(); } });
+
+function init(){
+  Object.values(SCENARIOS).forEach(sc=>Object.entries(sc.scenes).forEach(([k,s])=>{ s.id=k; }));
+  const errs=validateScenarios();
+  if(errs.length){ console.error("Leadership Coach: problemas nos cenários:",errs); toast("Foi detectado um problema na configuração dos cenários. Consulte o console."); }
+  app.store=loadStore();
+  go("dashboard",{focus:false});
+  if(app.notice) announce(app.notice);
+}
+init();
+</script>
+</body>
+</html>
